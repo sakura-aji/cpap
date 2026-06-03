@@ -3,195 +3,230 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>BreatheWell — Local CPAP Buying Assistant</title>
+<title>Philips Navigator — CPAP Buying Assistant</title>
 <style>
-  :root{
-    --bg:#eef3f8;
-    --panel:#ffffff;
-    --brand:#1f7a8c;
-    --brand-dark:#15596a;
-    --brand-soft:#e3f1f4;
-    --user:#1f7a8c;
-    --bot:#f8fafc;
-    --text:#111827;
-    --muted:#667085;
-    --line:#e5e7eb;
-    --good:#0f766e;
-    --good-bg:#ecfdf5;
-    --warn:#b45309;
-    --warn-bg:#fffbeb;
-    --danger:#b42318;
-    --danger-bg:#fff1f3;
-    --shadow:0 20px 55px rgba(20,60,80,.20);
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-    background:linear-gradient(135deg,#dfeaf2,#eef3f8);
-    min-height:100vh;
-    color:var(--text);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    padding:16px;
-  }
-  .app{
-    width:100%;
-    max-width:520px;
-    height:min(900px,95vh);
-    background:var(--panel);
-    border-radius:24px;
-    box-shadow:var(--shadow);
-    display:flex;
-    flex-direction:column;
-    overflow:hidden;
-  }
-  header{
-    background:linear-gradient(135deg,var(--brand),var(--brand-dark));
-    color:#fff;
-    padding:16px 18px 14px;
-  }
-  .topbar{display:flex;align-items:center;gap:12px}
-  .logo{
-    width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.18);
-    display:flex;align-items:center;justify-content:center;font-size:23px;flex-shrink:0;
-  }
-  header h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.2px}
-  header p{margin:2px 0 0;font-size:12px;opacity:.86}
-  .status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;opacity:.9}
-  .dot{width:8px;height:8px;border-radius:50%;background:#7CFFB2;box-shadow:0 0 8px #7CFFB2}
-  .stage-wrap{margin-top:14px;background:rgba(255,255,255,.14);border-radius:14px;padding:10px}
-  .stage-title{display:flex;justify-content:space-between;gap:8px;font-size:11px;opacity:.95;margin-bottom:8px}
-  .progress{height:8px;background:rgba(255,255,255,.23);border-radius:999px;overflow:hidden}
-  #progressFill{height:100%;width:0%;background:#7CFFB2;border-radius:999px;transition:.25s}
-  .stage-labels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px;font-size:9.5px;line-height:1.2;opacity:.85;text-align:center}
+ :root{
+  --bg:#eef3f8;
+  --panel:#ffffff;
+  --brand:#0281c3;
+  --brand-dark:#026da5;
+  --brand-soft:#e6f5fc;
+  --user:#0281c3;
+  --bot:#f8fafc;
+  --text:#111827;
+  --muted:#667085;
+  --line:#e5e7eb;
+  --good:#0f766e;
+  --good-bg:#ecfdf5;
+  --warn:#b45309;
+  --warn-bg:#fffbeb;
+  --danger:#b42318;
+  --danger-bg:#fff1f3;
+  --shadow:0 20px 55px rgba(2,129,195,.20);
+ }
+ *{box-sizing:border-box}
+ body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:linear-gradient(135deg,#dfeaf2,#eef3f8);
+  min-height:100vh;
+  color:var(--text);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:16px;
+ }
+ .app{
+  width:100%;
+  max-width:680px;
+  height:min(900px,95vh);
+  background:var(--panel);
+  border-radius:24px;
+  box-shadow:var(--shadow);
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+ }
+ header{
+  background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;
+  padding:16px 18px 14px;
+ }
+ .topbar{display:flex;align-items:center;gap:12px}
+ .logo{
+  width:64px;height:44px;border-radius:0;background:transparent;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  padding:0;overflow:hidden;
+ }
+ .logo img{width:100%;height:100%;object-fit:contain;display:block}
+ header h1{font-size:17px;margin:0;font-weight:800;letter-spacing:.2px}
+ header p{margin:2px 0 0;font-size:12px;opacity:.86}
+ .status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;opacity:.9}
+ .dot{width:8px;height:8px;border-radius:50%;background:#7CFFB2;box-shadow:0 0 8px #7CFFB2}
+ .stage-wrap{margin-top:14px;background:rgba(255,255,255,.14);border-radius:14px;padding:10px}
+ .stage-title{display:flex;justify-content:space-between;gap:8px;font-size:11px;opacity:.95;margin-bottom:8px}
+ .progress{height:8px;background:rgba(255,255,255,.23);border-radius:999px;overflow:hidden}
+ #progressFill{height:100%;width:0%;background:#7CFFB2;border-radius:999px;transition:.25s}
+ .stage-labels{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:8px;font-size:9.5px;line-height:1.2;opacity:.85;text-align:center}
 
-  .catalog{
-    background:#fff;
-    border-bottom:1px solid var(--line);
-    padding:12px 14px 10px;
-  }
-  .catalog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-  .catalog h2{margin:0;font-size:13px;color:#101828}
-  .catalog small{color:var(--muted);font-size:11px}
-  .products{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
-  .product{
-    min-width:170px;
-    border:1px solid var(--line);
-    border-radius:16px;
-    background:#fff;
-    overflow:hidden;
-    cursor:pointer;
-    transition:.15s;
-  }
-  .product:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,23,42,.08)}
-  .product-visual{
-    height:72px;
-    background:linear-gradient(135deg,#f8fafc,#e8f3f6);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:34px;
-  }
-  .product-body{padding:10px}
-  .product-name{font-size:12.5px;font-weight:800;line-height:1.25;margin-bottom:4px}
-  .product-desc{font-size:10.5px;color:var(--muted);line-height:1.35;height:42px;overflow:hidden}
-  .price{font-size:17px;font-weight:900;margin-top:8px;color:#101828}
+ .catalog{
+  background:#fff;
+  border-bottom:1px solid var(--line);
+  padding:12px 14px 10px;
+ }
+ .catalog-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+ .catalog h2{margin:0;font-size:13px;color:#101828}
+ .catalog small{color:var(--muted);font-size:11px}
+ .products{display:flex;gap:10px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+ .product{
+  min-width:170px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:#fff;
+  overflow:hidden;
+  cursor:pointer;
+  transition:.15s;
+ }
+ .product:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,23,42,.08)}
+ .product-visual{
+  height:96px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+ }
+ .product-visual img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+ }
+ .product-body{padding:10px}
+ .product-name{font-size:12.5px;font-weight:800;line-height:1.25;margin-bottom:4px}
+ .product-desc{font-size:10.5px;color:var(--muted);line-height:1.35;height:42px;overflow:hidden}
+ .price{font-size:17px;font-weight:900;margin-top:8px;color:#101828}
 
-  #chat{
-    flex:1;
-    overflow-y:auto;
-    padding:16px;
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    background:var(--bg);
-  }
-  .msg{
-    max-width:86%;
-    padding:11px 14px;
-    border-radius:17px;
-    font-size:14.3px;
-    line-height:1.5;
-    white-space:pre-wrap;
-    word-wrap:break-word;
-    animation:pop .18s ease;
-  }
-  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-  .bot{align-self:flex-start;background:var(--bot);color:var(--text);border:1px solid #edf2f7;border-bottom-left-radius:5px}
-  .user{align-self:flex-end;background:var(--user);color:#fff;border-bottom-right-radius:5px}
-  .msg b{font-weight:800}
-  .note{display:block;background:var(--warn-bg);border:1px solid #fed7aa;color:#92400e;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:12px;line-height:1.45}
-  .success{display:block;background:var(--good-bg);border:1px solid #99f6e4;color:#115e59;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:12px;line-height:1.45}
+ #chat{
+  flex:1;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  background:var(--bg);
+ }
+ .msg{
+  max-width:86%;
+  padding:11px 14px;
+  border-radius:17px;
+  font-size:14.3px;
+  line-height:1.5;
+  white-space:pre-wrap;
+  word-wrap:break-word;
+  animation:pop .18s ease;
+ }
+ @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+ .bot{align-self:flex-start;background:var(--bot);color:var(--text);border:1px solid #edf2f7;border-bottom-left-radius:5px}
+ .user{align-self:flex-end;background:var(--user);color:#fff;border-bottom-right-radius:5px}
+ .msg b{font-weight:800}
+ .note{display:block;background:var(--warn-bg);border:1px solid #fed7aa;color:#92400e;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:12px;line-height:1.45}
+ .success{display:block;background:var(--good-bg);border:1px solid #99f6e4;color:#115e59;border-radius:10px;padding:9px 10px;margin-top:7px;font-size:12px;line-height:1.45}
 
-  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 8px;background:var(--bg)}
-  .chip{
-    background:#fff;border:1px solid var(--brand);color:var(--brand-dark);
-    padding:7px 12px;border-radius:20px;font-size:12.3px;cursor:pointer;transition:.15s;font-weight:700;
-  }
-  .chip:hover{background:var(--brand);color:#fff}
-  .chip.secondary{border-color:#d0d5dd;color:#344054}
-  .chip.secondary:hover{background:#344054;color:#fff}
+ .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 8px;background:var(--bg)}
+ .chip{
+  background:#fff;border:1px solid var(--brand);color:var(--brand-dark);
+  padding:7px 12px;border-radius:20px;font-size:12.3px;cursor:pointer;transition:.15s;font-weight:700;
+ }
+ .chip:hover{background:var(--brand);color:#fff}
+ .chip.secondary{border-color:#d0d5dd;color:#344054}
+ .chip.secondary:hover{background:#344054;color:#fff}
 
-  .typing{align-self:flex-start;background:var(--bot);padding:13px 16px;border-radius:16px;border-bottom-left-radius:5px;display:flex;gap:4px;border:1px solid #edf2f7}
-  .typing span{width:7px;height:7px;background:#9bb0bd;border-radius:50%;animation:bounce 1.2s infinite}
-  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
-  @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+ .typing{align-self:flex-start;background:var(--bot);padding:13px 16px;border-radius:16px;border-bottom-left-radius:5px;display:flex;gap:4px;border:1px solid #edf2f7}
+ .typing span{width:7px;height:7px;background:#9bb0bd;border-radius:50%;animation:bounce 1.2s infinite}
+ .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+ @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
 
-  footer{padding:12px;border-top:1px solid var(--line);background:#fff}
-  .inputbar{display:flex;gap:8px;align-items:flex-end}
-  #input{
-    flex:1;border:1px solid var(--line);border-radius:22px;padding:11px 15px;font-size:14.5px;
-    resize:none;max-height:110px;outline:none;font-family:inherit;line-height:1.4;
-  }
-  #input:focus{border-color:var(--brand)}
-  #send{
-    background:var(--brand);color:#fff;border:none;width:44px;height:44px;border-radius:50%;
-    font-size:19px;cursor:pointer;flex-shrink:0;transition:.15s;display:flex;align-items:center;justify-content:center;
-  }
-  #send:hover{background:var(--brand-dark)}
-  .disclaimer{font-size:10.5px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.4}
+ footer{padding:12px;border-top:1px solid var(--line);background:#fff}
+ .inputbar{display:flex;gap:8px;align-items:flex-end}
+ #input{
+  flex:1;border:1px solid var(--line);border-radius:22px;padding:11px 15px;font-size:14.5px;
+  resize:none;max-height:110px;outline:none;font-family:inherit;line-height:1.4;
+ }
+ #input:focus{border-color:var(--brand)}
+ #send{
+  background:var(--brand);color:#fff;border:none;width:44px;height:44px;border-radius:50%;
+  font-size:19px;cursor:pointer;flex-shrink:0;transition:.15s;display:flex;align-items:center;justify-content:center;
+ }
+ #send:hover{background:var(--brand-dark)}
+ .retarget{
+  background:#fff;
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+ }
+ .retarget-card{
+  border:1px solid #bde5f8;
+  background:linear-gradient(135deg,#e6f5fc,#f8fafc);
+  border-radius:16px;
+  padding:13px 14px;
+  box-shadow:0 8px 22px rgba(2,129,195,.10);
+ }
+ .retarget-card b{display:block;font-size:13.5px;margin-bottom:4px;color:#0f172a}
+ .retarget-card p{margin:0;color:var(--muted);font-size:12.5px;line-height:1.45}
+ .retarget-card button{
+  margin-top:10px;border:none;background:var(--brand);color:#fff;border-radius:999px;
+  padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;
+ }
+ .retarget-card button:hover{background:var(--brand-dark)}
+
+ .disclaimer{font-size:10.5px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.4}
 </style>
 </head>
 <body>
 <div class="app">
-  <header>
-    <div class="topbar">
-      <div class="logo">🫁</div>
-      <div>
-        <h1>BreatheWell</h1>
-        <p>Local CPAP buying guide — no API required</p>
-      </div>
-      <div class="status"><span class="dot"></span>Local</div>
-    </div>
-    <div class="stage-wrap">
-      <div class="stage-title"><span id="stageText">Stage 0: Start</span><span id="stagePercent">0%</span></div>
-      <div class="progress"><div id="progressFill"></div></div>
-      <div class="stage-labels">
-        <span>Sleep clinic</span><span>Diagnosis</span><span>Doctor/Rx</span><span>DME</span><span>CPAP order</span>
-      </div>
-    </div>
-  </header>
+ <header>
+  <div class="topbar">
+   <div class="logo"><img src="https://kreafolk.com/cdn/shop/articles/philips-logo-design-history-and-evolution-kreafolk_f1fc2da1-f530-4f3c-b656-b0bd1bd55a23.jpg?v=1771570750&width=2048" alt="Philips logo"></div>
+   <div>
+    <h1>Philips Navigator</h1>
+    <p>CPAP buying guide</p>
+   </div>
+   <div class="status"><span class="dot"></span>Online</div>
+  </div>
+  <div class="stage-wrap">
+   <div class="stage-title"><span id="stageText">Stage 0: Start</span><span id="stagePercent">0%</span></div>
+   <div class="progress"><div id="progressFill"></div></div>
+   <div class="stage-labels">
+    <span>Sleep clinic</span><span>Diagnosis</span><span>Doctor/Rx</span><span>DME</span><span>CPAP order</span>
+   </div>
+  </div>
+ </header>
 
-  <section class="catalog">
-    <div class="catalog-head">
-      <h2>Suggested CPAP package options</h2>
-      <small>Tap a card to ask</small>
-    </div>
-    <div class="products" id="products"></div>
-  </section>
+ <section class="retarget">
+  <div class="retarget-card">
+   <b>Hey, you visited our website recently and dropped your details.</b>
+   <p>You have not booked your home sleep test yet. Philips Navigator helps you move from test booking to CPAP package selection, so you can complete the journey and order the right setup.</p>
+   <button onclick="handleUser('I have not booked my home sleep test')">Continue from home sleep test</button>
+  </div>
+ </section>
 
-  <div id="chat"></div>
-  <div class="chips" id="chips"></div>
+ <section class="catalog">
+  <div class="catalog-head">
+   <h2>CPAP packages Philips Navigator can help you choose</h2>
+   <small>Tap a card to learn more</small>
+  </div>
+  <div class="products" id="products"></div>
+ </section>
 
-  <footer>
-    <div class="inputbar">
-      <textarea id="input" rows="1" placeholder="Ask about buying CPAP, DME, sleep clinic…"></textarea>
-      <button id="send" title="Send">➤</button>
-    </div>
-    <div class="disclaimer">⚕️ Educational support only. CPAP purchase usually requires sleep diagnosis + clinician prescription. No external API is used.</div>
-  </footer>
+ <div id="chat"></div>
+ <div class="chips" id="chips"></div>
+
+ <footer>
+  <div class="inputbar">
+   <textarea id="input" rows="1" placeholder="Ask about home sleep test, CPAP package, DME…"></textarea>
+   <button id="send" title="Send">➤</button>
+  </div>
+ </footer>
 </div>
 
 <script>
@@ -204,160 +239,162 @@ const progressFill = document.getElementById('progressFill');
 const stageText = document.getElementById('stageText');
 const stagePercent = document.getElementById('stagePercent');
 
-/* Everything is local. Edit these arrays to change Q&A, stage flow, or products. */
+/* Edit these arrays to change Q&A, stage flow, or products. */
 const products = [
-  {
-    id:'apap-package',
-    icon:'💨',
-    name:'Auto CPAP (APAP) Therapy Package',
-    price:'$275.00',
-    short:'Auto-adjusting pressure device with humidifier and mask fitting session.',
-    detail:'This is the main therapy package. Best once the patient has diagnosis, prescription, and is ready to order through a DME/provider. APAP adjusts pressure across the night based on breathing patterns.'
-  },
-  {
-    id:'cleaning-kit',
-    icon:'🧼',
-    name:'CPAP Cleaning & Hygiene Kit',
-    price:'$60.00',
-    short:'Mask wipes, tube brush, detergent concentrate, and drying rack.',
-    detail:'Add-on after machine selection. Useful to reduce odour, irritation, infection risk, and extend mask/tube life.'
-  },
-  {
-    id:'clinical-review',
-    icon:'📊',
-    name:'Therapy Data Download & Clinical Review',
-    price:'$120.00',
-    short:'Review of usage hours, AHI, leak rate, residual events, and pressure trends.',
-    detail:'Best after the patient has started therapy. The DME or clinician reviews usage data and recommends adjustment if the mask leaks, AHI remains high, or pressure feels uncomfortable.'
-  }
+ {
+  id:'apap-package',
+  image:'https://www.philips.com.sg/c-dam/b2c/master/experience/hs/sleep-apnea-therapy/sleep-apnea-machines/dreamstation-intro.jpg',
+  name:'Auto CPAP (APAP) Therapy Package',
+  price:'$275.00',
+  short:'Auto-adjusting pressure device with humidifier and mask fitting session.',
+  detail:'Main CPAP package to recommend once you are ready to order. Includes the APAP machine setup path, humidifier, and mask fitting support so you can move from diagnosis to purchase smoothly. APAP adjusts pressure across the night based on breathing patterns.'
+ },
+ {
+  id:'cleaning-kit',
+  image:'https://images.philips.com/is/image/philipsconsumer/76fad1fdcc654d339ac0a96800e56e73?$pnglarge$&wid=960',
+  name:'CPAP Cleaning & Hygiene Kit',
+  price:'$60.00',
+  short:'Mask wipes, tube brush, detergent concentrate, and drying rack.',
+  detail:'Recommended add-on with every CPAP machine purchase. Helps keep the mask and tubing fresh, reduces odour and irritation, and extends the life of supplies.'
+ },
+ {
+  id:'clinical-review',
+  image:'https://www.philips.co.in/c-dam/b2c/master/experience/hs/sleep-apnea-therapy/dream-mapper/dreammapper-intro-image.jpg',
+  name:'Therapy Data Download & Clinical Review',
+  price:'$120.00',
+  short:'Review of usage hours, AHI, leak rate, residual events, and pressure trends.',
+  detail:'Recommended follow-up purchase after therapy starts. Reviews usage hours, AHI, leaks, residual events, and pressure trends so you can improve comfort and stay on therapy.'
+ }
 ];
 
 const stages = [
-  'Start',
-  'Book sleep diagnosis clinic',
-  'Complete sleep study / get diagnosis',
-  'See sleep provider doctor / get prescription',
-  'Book DME provider',
-  'Choose CPAP product & order'
+ 'Start',
+ 'Book sleep diagnosis clinic',
+ 'Complete sleep study / get diagnosis',
+ 'See sleep provider doctor / get prescription',
+ 'Book DME provider',
+ 'Choose CPAP product & order'
 ];
 
 const state = {
-  stage:0,
-  hasClinic:false,
-  hasSleepStudy:false,
-  hasDiagnosis:false,
-  hasDoctor:false,
-  hasPrescription:false,
-  hasDME:false,
-  selectedProduct:null,
-  lastTopic:null
+ stage:0,
+ hasClinic:false,
+ hasSleepStudy:false,
+ hasDiagnosis:false,
+ hasDoctor:false,
+ hasPrescription:false,
+ hasDME:false,
+ selectedProduct:null,
+ lastTopic:null
 };
 
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function format(s){
-  return escapeHtml(s)
-    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
-    .replace(/\[note\]([\s\S]*?)\[\/note\]/g,'<span class="note">$1</span>')
-    .replace(/\[success\]([\s\S]*?)\[\/success\]/g,'<span class="success">$1</span>');
+ return escapeHtml(s)
+  .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>')
+  .replace(/\[note\]([\s\S]*?)\[\/note\]/g,'<span class="note">$1</span>')
+  .replace(/\[success\]([\s\S]*?)\[\/success\]/g,'<span class="success">$1</span>');
 }
 function addMsg(text, who){
-  const d = document.createElement('div');
-  d.className = 'msg ' + who;
-  d.innerHTML = format(text);
-  chat.appendChild(d);
-  chat.scrollTop = chat.scrollHeight;
+ const d = document.createElement('div');
+ d.className = 'msg ' + who;
+ d.innerHTML = format(text);
+ chat.appendChild(d);
+ chat.scrollTop = chat.scrollHeight;
 }
 function showTyping(){
-  const t = document.createElement('div');
-  t.className='typing'; t.id='typing';
-  t.innerHTML='<span></span><span></span><span></span>';
-  chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
+ const t = document.createElement('div');
+ t.className='typing'; t.id='typing';
+ t.innerHTML='<span></span><span></span><span></span>';
+ chat.appendChild(t); chat.scrollTop=chat.scrollHeight;
 }
 function hideTyping(){const t=document.getElementById('typing'); if(t)t.remove();}
 function setChips(list){
-  chipsEl.innerHTML='';
-  (list||[]).forEach(item=>{
-    const label = typeof item === 'string' ? item : item.label;
-    const klass = typeof item === 'string' ? '' : (item.className || '');
-    const c=document.createElement('button');
-    c.type='button';
-    c.className='chip ' + klass;
-    c.textContent=label;
-    c.onclick=()=>handleUser(label);
-    chipsEl.appendChild(c);
-  });
+ chipsEl.innerHTML='';
+ (list||[]).forEach(item=>{
+  const label = typeof item === 'string' ? item : item.label;
+  const klass = typeof item === 'string' ? '' : (item.className || '');
+  const c=document.createElement('button');
+  c.type='button';
+  c.className='chip ' + klass;
+  c.textContent=label;
+  c.onclick=()=>handleUser(label);
+  chipsEl.appendChild(c);
+ });
 }
 function updateProgress(){
-  const doneCount = [state.hasClinic,state.hasSleepStudy||state.hasDiagnosis,state.hasDoctor||state.hasPrescription,state.hasDME,!!state.selectedProduct].filter(Boolean).length;
-  state.stage = Math.max(state.stage, doneCount);
-  const pct = Math.round((doneCount/5)*100);
-  progressFill.style.width = pct + '%';
-  stageText.textContent = `Stage ${doneCount}: ${stages[doneCount]}`;
-  stagePercent.textContent = pct + '%';
+ const doneCount = [state.hasClinic,state.hasSleepStudy||state.hasDiagnosis,state.hasDoctor||state.hasPrescription,state.hasDME,!!state.selectedProduct].filter(Boolean).length;
+ state.stage = Math.max(state.stage, doneCount);
+ const pct = Math.round((doneCount/5)*100);
+ progressFill.style.width = pct + '%';
+ stageText.textContent = `Stage ${doneCount}: ${stages[doneCount]}`;
+ stagePercent.textContent = pct + '%';
 }
 function renderProducts(){
-  productsEl.innerHTML = products.map(p=>`
-    <article class="product" data-id="${p.id}">
-      <div class="product-visual">${p.icon}</div>
-      <div class="product-body">
-        <div class="product-name">${p.name}</div>
-        <div class="product-desc">${p.short}</div>
-        <div class="price">${p.price}</div>
-      </div>
-    </article>
-  `).join('');
-  productsEl.querySelectorAll('.product').forEach(card=>{
-    card.onclick = () => {
-      const p = products.find(x=>x.id === card.dataset.id);
-      handleUser('Tell me about ' + p.name);
-    };
-  });
+ productsEl.innerHTML = products.map(p=>`
+  <article class="product" data-id="${p.id}">
+   <div class="product-visual">
+    <img src="${p.image}" alt="${p.name}" loading="lazy">
+   </div>
+   <div class="product-body">
+    <div class="product-name">${p.name}</div>
+    <div class="product-desc">${p.short}</div>
+    <div class="price">${p.price}</div>
+   </div>
+  </article>
+ `).join('');
+ productsEl.querySelectorAll('.product').forEach(card=>{
+  card.onclick = () => {
+   const p = products.find(x=>x.id === card.dataset.id);
+   handleUser('Tell me about ' + p.name);
+  };
+ });
 }
 
 const has = (t,...words)=>words.some(w=>t.includes(w));
 
 function stageGuide(){
-  if(!state.hasClinic){
-    return {
-      text:`Let's guide the patient through the CPAP buying journey.
+ if(!state.hasClinic){
+  return {
+   text:`Let's guide you through the CPAP buying journey.
 
 **Stage 1 — Sleep diagnosis clinic**
-Has the patient already booked a sleep diagnosis clinic / sleep study appointment?
+Have you already booked your home sleep test or sleep diagnosis appointment?
 
-[note]Most drop-off happens here because patients think snoring is “normal”, worry about cost, or do not know the next action. The motivation: diagnosis is the gatekeeper. Without it, they cannot safely buy the right CPAP.[/note]`,
-      chips:['Yes, clinic is booked','No, not booked yet','Why do I need a sleep study?','I am worried about cost']
-    };
-  }
-  if(!state.hasSleepStudy && !state.hasDiagnosis){
-    return {
-      text:`**Stage 2 — Sleep study / diagnosis**
-Has the patient completed the sleep study and received results such as AHI or OSA severity?
+This is the key first step. Once you book the sleep test, Philips Navigator can move you forward to the right CPAP package instead of leaving you stuck at enquiry stage.`,
+   chips:['Yes, clinic is booked','No, not booked yet','Why do I need a sleep study?','I am worried about cost']
+  };
+ }
+ if(!state.hasSleepStudy && !state.hasDiagnosis){
+  return {
+   text:`**Stage 2 — Sleep study / diagnosis**
+Have you completed the sleep study and received results such as AHI or OSA severity?
 
 [success]Clinic booked. Next goal: complete the sleep test and get objective diagnosis.[/success]`,
-      chips:['Yes, diagnosis received','Sleep study done, waiting results','No, sleep study not done','What is AHI?']
-    };
-  }
-  if(!state.hasDoctor && !state.hasPrescription){
-    return {
-      text:`**Stage 3 — Sleep provider doctor / prescription**
-Has the patient booked or seen the sleep doctor/provider to review the result and issue a CPAP prescription?
+   chips:['Yes, diagnosis received','Sleep study done, waiting results','No, sleep study not done','What is AHI?']
+  };
+ }
+ if(!state.hasDoctor && !state.hasPrescription){
+  return {
+   text:`**Stage 3 — Sleep provider doctor / prescription**
+Have you booked or seen the sleep doctor/provider to review the result and issue your CPAP prescription?
 
-[note]Patients may drop off here because they think diagnosis alone is enough. It is not. The prescription tells the DME/provider what pressure range and device type are appropriate.[/note]`,
-      chips:['Yes, I have prescription','Doctor appointment booked','No doctor appointment yet','Why is prescription needed?']
-    };
-  }
-  if(!state.hasDME){
-    return {
-      text:`**Stage 4 — DME provider**
-Has the patient booked or contacted a DME provider / CPAP supplier?
+This step turns your result into a buying-ready plan. After the doctor review, you can move confidently into DME setup and CPAP package selection.`,
+   chips:['Yes, I have prescription','Doctor appointment booked','No doctor appointment yet','Why is prescription needed?']
+  };
+ }
+ if(!state.hasDME){
+  return {
+   text:`**Stage 4 — DME provider**
+Have you booked or contacted a DME provider / CPAP supplier?
 
 A DME provider helps with machine setup, mask fitting, supply replacement, education, and therapy data review. This is where the buying journey becomes practical.`,
-      chips:['Yes, DME booked','No DME yet','What is a DME provider?','Where should I buy?']
-    };
-  }
-  return {
-    text:`**Stage 5 — Choose CPAP product & order**
-Now the patient is ready to choose the product package.
+   chips:['Yes, DME booked','No DME yet','What is a DME provider?','Where should I buy?']
+  };
+ }
+ return {
+  text:`**Stage 5 — Choose CPAP product & order**
+Now you are ready to choose the product package.
 
 Recommended order:
 1. **Auto CPAP (APAP) Therapy Package** — main machine setup
@@ -365,80 +402,80 @@ Recommended order:
 3. **Therapy Data Download & Clinical Review** — follow-up after usage starts
 
 Which product should we explain or add?`,
-    chips:['Auto CPAP package','Cleaning kit','Clinical review','Compare all products']
-  };
+  chips:['Auto CPAP package','Cleaning kit','Clinical review','Compare all products']
+ };
 }
 
 function reasonResponse(t){
-  if(has(t,'cost','expensive','price','money','afford','cheap')){
-    return {
-      text:`Cost concern is a very normal drop-off reason.
+ if(has(t,'cost','expensive','price','money','afford','cheap')){
+  return {
+   text:`Cost concern is a very normal drop-off reason.
 
-How to motivate the patient:
-• Remind them they do **not** need to buy everything immediately before diagnosis.
+How Philips Navigator should motivate you:
+• Remind you you do **not** need to buy everything immediately before diagnosis.
 • First step is only confirming whether OSA exists.
 • A prescription prevents buying the wrong machine/mask.
 • Untreated OSA can lead to bigger health and productivity costs later.
 
 For this product page, you can position the journey as: **diagnose first → prescribe correctly → buy only what is needed**.`,
-      chips:['Continue journey','What does CPAP cost?','Why do I need a sleep study?']
-    };
-  }
-  if(has(t,'scared','afraid','fear','claustrophobic','uncomfortable','mask')){
-    return {
-      text:`Fear of the mask is another major drop-off reason.
+   chips:['Continue journey','What does CPAP cost?','Why do I need a sleep study?']
+  };
+ }
+ if(has(t,'scared','afraid','fear','claustrophobic','uncomfortable','mask')){
+  return {
+   text:`Fear of the mask is another major drop-off reason.
 
-Patient motivation:
-• They do not need to commit to a big mask immediately.
+Motivation for you:
+• You do not need to commit to a big mask immediately.
 • Mask fitting can start with smaller options like nasal pillow masks.
 • APAP machines have ramp and comfort settings.
 • The first few weeks are adjustment, not failure.
 
-The chatbot should reassure them: **comfort problems are usually solvable with fitting, humidifier, ramp, or mask change**.`,
-      chips:['Help me pick a mask','Continue journey','Tips for adjusting to CPAP']
-    };
-  }
-  if(has(t,'time','busy','later','delay','book appointment','appointment')){
-    return {
-      text:`Time/booking friction is exactly where the chatbot should push gently.
+The chatbot should reassure you: **comfort problems are usually solvable with fitting, humidifier, ramp, or mask change**.`,
+   chips:['Help me pick a mask','Continue journey','Tips for adjusting to CPAP']
+  };
+ }
+ if(has(t,'time','busy','later','delay','book appointment','appointment')){
+  return {
+   text:`Time/booking friction is exactly where the chatbot should push gently.
 
 Motivation message:
 **You do not need to solve everything today. Just book the sleep clinic appointment.**
 
 Once booked, the next steps become clearer: test → result → doctor → DME → CPAP package.`,
-      chips:['I booked the clinic','Continue journey','Explain the stages']
-    };
-  }
-  return null;
+   chips:['I booked the clinic','Continue journey','Explain the stages']
+  };
+ }
+ return null;
 }
 
 function productResponse(t){
-  const selected = products.find(p => has(t, p.name.toLowerCase().split(' ')[0], p.id, p.name.toLowerCase()) ||
-    (has(t,'auto cpap','apap','therapy package') && p.id==='apap-package') ||
-    (has(t,'cleaning','hygiene') && p.id==='cleaning-kit') ||
-    (has(t,'clinical review','data download','therapy data','ahi','leak rate') && p.id==='clinical-review')
-  );
-  if(selected){
-    state.selectedProduct = selected.id;
-    updateProgress();
-    return {
-      text:`**${selected.name}**
+ const selected = products.find(p => has(t, p.name.toLowerCase().split(' ')[0], p.id, p.name.toLowerCase()) ||
+  (has(t,'auto cpap','apap','therapy package') && p.id==='apap-package') ||
+  (has(t,'cleaning','hygiene') && p.id==='cleaning-kit') ||
+  (has(t,'clinical review','data download','therapy data','ahi','leak rate') && p.id==='clinical-review')
+ );
+ if(selected){
+  state.selectedProduct = selected.id;
+  updateProgress();
+  return {
+   text:`**${selected.name}**
 Price: **${selected.price}**
 
 ${selected.detail}
 
 ${selected.id === 'apap-package'
-  ? '[success]This is the main recommended product once diagnosis + prescription + DME step are completed.[/success]'
-  : '[note]This is a supporting product, not a replacement for the CPAP prescription and machine setup.[/note]'}`,
-      chips:['Compare all products','Continue journey','Where should I buy?']
-    };
-  }
-  if(has(t,'compare all','compare products','all products','product list','models')){
-    return {
-      text:`Here are the embedded local product options:
+ ? '[success]This is the main recommended product to move you toward CPAP purchase.[/success]'
+ : '[success]Recommended add-on to complete your CPAP setup and improve long-term usage.[/success]'}`,
+   chips:['Compare all products','Continue journey','Where should I buy?']
+  };
+ }
+ if(has(t,'compare all','compare products','all products','product list','models')){
+  return {
+   text:`Here are the available product options:
 
 **1. Auto CPAP (APAP) Therapy Package — $275.00**
-Main therapy machine package. Best for patients who already completed diagnosis and have a CPAP prescription.
+Main therapy machine package. Best once you have completed diagnosis and have a CPAP prescription.
 
 **2. CPAP Cleaning & Hygiene Kit — $60.00**
 Maintenance add-on. Helps reduce odour, irritation, and infection risk.
@@ -447,80 +484,91 @@ Maintenance add-on. Helps reduce odour, irritation, and infection risk.
 Follow-up service. Reviews usage hours, AHI, residual events, leak rate, and pressure trends.
 
 Best bundle after prescription: **APAP package + cleaning kit**, then add **clinical review** after 2–4 weeks of usage.`,
-      chips:['Auto CPAP package','Cleaning kit','Clinical review','Continue journey']
-    };
-  }
-  return null;
+   chips:['Auto CPAP package','Cleaning kit','Clinical review','Continue journey']
+  };
+ }
+ return null;
 }
 
 const rules = [
-  {
-    test:t=>/^(hi|hey|hello|yo|hiya|start|restart)\b/.test(t),
-    reply:()=>{
-      Object.assign(state,{stage:0,hasClinic:false,hasSleepStudy:false,hasDiagnosis:false,hasDoctor:false,hasPrescription:false,hasDME:false,selectedProduct:null});
-      updateProgress();
-      return {
-        text:`Hi, I'm **BreatheWell** 🫁
+ {
+  test:t=>has(t,'not booked my home sleep test','home sleep test','book home sleep','book sleep test','book test'),
+  reply:()=>({
+   text:`You are at the first conversion point: **book the home sleep test**.
 
-I can guide a patient through the CPAP buying funnel:
+You do not need to choose a CPAP machine today. The home sleep test simply confirms whether you have sleep apnea and gives the doctor the data needed to prescribe the right CPAP setup.
+
+After the test, Philips Navigator can guide you to the right APAP package, mask support, hygiene kit, and clinical review.`,
+   chips:['I booked the clinic','Why do I need a sleep study?','I am worried about cost','Compare all products']
+  })
+ },
+ {
+  test:t=>/^(hi|hey|hello|yo|hiya|start|restart)\b/.test(t),
+  reply:()=>{
+   Object.assign(state,{stage:0,hasClinic:false,hasSleepStudy:false,hasDiagnosis:false,hasDoctor:false,hasPrescription:false,hasDME:false,selectedProduct:null});
+   updateProgress();
+   return {
+    text:`Hi, I'm **Philips Navigator** 🫁
+
+I can guide you toward buying the right CPAP package:
 **sleep diagnosis clinic → sleep study result → sleep doctor/prescription → DME provider → CPAP product selection**.
 
 I also answer drop-off concerns like cost, fear of CPAP, not knowing where to book, or not understanding why diagnosis is needed.
 
 Where should we start?`,
-        chips:['Start CPAP journey','Explain the stages','Compare all products','I think I have sleep apnea']
-      };
-    }
-  },
-  { test:t=>has(t,'start cpap journey','continue journey','guide me','buy cpap','help me buy','cpap journey','buying journey'), reply:()=>stageGuide() },
-  { test:t=>has(t,'explain the stages','what are the stages','stages','process','journey'), reply:()=>({
-      text:`The local chatbot journey is:
+    chips:['Start CPAP journey','Explain the stages','Compare all products','I think I have sleep apnea']
+   };
+  }
+ },
+ { test:t=>has(t,'start cpap journey','continue journey','guide me','buy cpap','help me buy','cpap journey','buying journey'), reply:()=>stageGuide() },
+ { test:t=>has(t,'explain the stages','what are the stages','stages','process','journey'), reply:()=>({
+   text:`The chatbot journey is:
 
 **1. Order/book sleep diagnosis clinic**
-Patient books the sleep clinic or sleep study appointment.
+You books the sleep clinic or sleep study appointment.
 
 **2. Sleep study + diagnosis**
-Patient completes test and receives AHI / OSA severity.
+You completes test and receives AHI / OSA severity.
 
 **3. Sleep provider doctor**
 Doctor reviews results and gives CPAP prescription.
 
 **4. DME provider**
-Patient books supplier for machine setup, mask fitting, education, and support.
+You books supplier for machine setup, mask fitting, education, and support.
 
 **5. Choose products**
-Patient selects APAP therapy package, cleaning kit, and/or therapy data review.`,
-      chips:['Start CPAP journey','Why do I need a sleep study?','Compare all products']
-    })
-  },
-  { test:t=>has(t,'yes, clinic is booked','clinic is booked','i booked the clinic','sleep clinic booked'), reply:()=>{state.hasClinic=true; updateProgress(); return stageGuide();} },
-  { test:t=>has(t,'no, not booked yet','not booked','no clinic','not yet clinic'), reply:()=>({
-      text:`No issue — this is the first action.
+You selects APAP therapy package, cleaning kit, and/or therapy data review.`,
+   chips:['Start CPAP journey','Why do I need a sleep study?','Compare all products']
+  })
+ },
+ { test:t=>has(t,'yes, clinic is booked','clinic is booked','i booked the clinic','sleep clinic booked'), reply:()=>{state.hasClinic=true; updateProgress(); return stageGuide();} },
+ { test:t=>has(t,'no, not booked yet','not booked','no clinic','not yet clinic'), reply:()=>({
+   text:`No issue — this is the first action.
 
 **Recommended next step:** book a sleep diagnosis clinic or ask a GP/sleep clinic for a sleep study.
 
 Motivation: CPAP is not like buying a normal gadget. The sleep test confirms whether apnea exists and how severe it is, so the doctor can prescribe the right pressure and device type.`,
-      chips:['I booked the clinic','Why do I need a sleep study?','I am worried about cost']
-    })
-  },
-  { test:t=>has(t,'yes, diagnosis received','diagnosis received','i have diagnosis','i have ahi','diagnosed','have osa'), reply:()=>{state.hasDiagnosis=true; state.hasSleepStudy=true; updateProgress(); return stageGuide();} },
-  { test:t=>has(t,'sleep study done','waiting results','done waiting'), reply:()=>({
-      text:`Good — the patient is between Stage 2 and Stage 3.
+   chips:['I booked the clinic','Why do I need a sleep study?','I am worried about cost']
+  })
+ },
+ { test:t=>has(t,'yes, diagnosis received','diagnosis received','i have diagnosis','i have ahi','diagnosed','have osa'), reply:()=>{state.hasDiagnosis=true; state.hasSleepStudy=true; updateProgress(); return stageGuide();} },
+ { test:t=>has(t,'sleep study done','waiting results','done waiting'), reply:()=>({
+   text:`Good — you are between Stage 2 and Stage 3.
 
-Next: wait for the result, then book/attend the doctor review. The key result to look for is **AHI** and OSA severity. Once the doctor reviews it, they can issue the CPAP prescription.`,
-      chips:['Yes, diagnosis received','What is AHI?','Doctor appointment booked']
-    })
-  },
-  { test:t=>has(t,'no, sleep study not done','sleep study not done','test not done'), reply:()=>({
-      text:`Then the journey is not ready for CPAP purchase yet.
+Next: wait for the result, then book/attend the doctor review. The key result to look for is **AHI** and OSA severity. Once the doctor reviews it, you can issue the CPAP prescription.`,
+   chips:['Yes, diagnosis received','What is AHI?','Doctor appointment booked']
+  })
+ },
+ { test:t=>has(t,'no, sleep study not done','sleep study not done','test not done'), reply:()=>({
+   text:`You are one step away from becoming purchase-ready.
 
-Message to patient: **finish the sleep study first.** The machine and mask choice should be based on diagnosis, severity, and prescription — otherwise they may buy the wrong setup.`,
-      chips:['I completed sleep study','Why do I need a sleep study?','Continue journey']
-    })
-  },
-  { test:t=>has(t,'i completed sleep study','completed sleep study'), reply:()=>{state.hasSleepStudy=true; updateProgress(); return stageGuide();} },
-  { test:t=>has(t,'yes, i have prescription','have prescription','i have prescription','rx','script','prescription'), reply:()=>{state.hasDoctor=true; state.hasPrescription=true; updateProgress(); return stageGuide();} },
-  { test:t=>has(t,'doctor appointment booked','doctor booked','provider booked'), reply:()=>{state.hasDoctor=true; updateProgress(); return {text:`Great. The patient is nearly ready. After the doctor visit, ask for:
+Message for you: **complete the sleep study first**, then Philips Navigator can recommend the CPAP package, mask support, cleaning kit, and follow-up review that fit your result.`,
+   chips:['I completed sleep study','Why do I need a sleep study?','Continue journey']
+  })
+ },
+ { test:t=>has(t,'i completed sleep study','completed sleep study'), reply:()=>{state.hasSleepStudy=true; updateProgress(); return stageGuide();} },
+ { test:t=>has(t,'yes, i have prescription','have prescription','i have prescription','rx','script','prescription'), reply:()=>{state.hasDoctor=true; state.hasPrescription=true; updateProgress(); return stageGuide();} },
+ { test:t=>has(t,'doctor appointment booked','doctor booked','provider booked'), reply:()=>{state.hasDoctor=true; updateProgress(); return {text:`Great. You is nearly ready. After the doctor visit, ask for:
 
 • CPAP/APAP/BiPAP device type
 • Pressure or pressure range
@@ -528,69 +576,69 @@ Message to patient: **finish the sleep study first.** The machine and mask choic
 • DME/provider referral if needed
 
 Once prescription is issued, the next step is the DME provider.`, chips:['Yes, I have prescription','What is a DME provider?','Continue journey']};} },
-  { test:t=>has(t,'no doctor appointment','no doctor','not seen doctor'), reply:()=>({
-      text:`The next action is to book the sleep provider doctor review.
+ { test:t=>has(t,'no doctor appointment','no doctor','not seen doctor'), reply:()=>({
+   text:`The next action is to book the sleep provider doctor review.
 
-Motivation: the sleep test gives data, but the doctor translates it into a treatment plan and prescription. Without the prescription, the patient may get blocked at purchase or set up the machine incorrectly.`,
-      chips:['Doctor appointment booked','Why is prescription needed?','Continue journey']
-    })
-  },
-  { test:t=>has(t,'yes, dme booked','dme booked','supplier booked','provider contacted'), reply:()=>{state.hasDME=true; updateProgress(); return stageGuide();} },
-  { test:t=>has(t,'no dme yet','no dme','no supplier'), reply:()=>({
-      text:`Next step: contact a **DME provider / CPAP supplier**.
+Motivation: the sleep test gives data, but your doctor translates it into a treatment plan and prescription. Without the prescription, you may get blocked at purchase or set up the machine incorrectly.`,
+   chips:['Doctor appointment booked','Why is prescription needed?','Continue journey']
+  })
+ },
+ { test:t=>has(t,'yes, dme booked','dme booked','supplier booked','provider contacted'), reply:()=>{state.hasDME=true; updateProgress(); return stageGuide();} },
+ { test:t=>has(t,'no dme yet','no dme','no supplier'), reply:()=>({
+   text:`Next step: contact a **DME provider / CPAP supplier**.
 
-Ask them for:
+Ask you for:
 • APAP/CPAP machine options based on prescription
 • Mask fitting session
 • Warranty and replacement supplies
 • Data review / compliance reporting
 
-Once DME is booked, the patient can confidently choose the product package.`,
-      chips:['Yes, DME booked','What is a DME provider?','Where should I buy?']
-    })
-  },
-  { test:t=>has(t,'what is a dme','dme provider','durable medical equipment'), reply:()=>({
-      text:`A **DME provider** means Durable Medical Equipment provider.
+Once DME is booked, you can confidently choose the product package.`,
+   chips:['Yes, DME booked','What is a DME provider?','Where should I buy?']
+  })
+ },
+ { test:t=>has(t,'what is a dme','dme provider','durable medical equipment'), reply:()=>({
+   text:`A **DME provider** means Durable Medical Equipment provider.
 
-For CPAP, they usually help with:
+For CPAP, you usually help with:
 • Machine supply and setup
 • Mask fitting
-• Teaching the patient how to use and clean CPAP
+• Teaching you how to use and clean CPAP
 • Replacement parts
 • Therapy data download / compliance reports
 • Troubleshooting leaks, pressure discomfort, dry mouth, or low usage
 
 In the funnel, DME comes after diagnosis and prescription.`,
-      chips:['Yes, DME booked','Where should I buy?','Continue journey']
-    })
-  },
-  { test:t=>has(t,'why do i need sleep study','why do i need a sleep study','why sleep study'), reply:()=>({
-      text:`Because CPAP pressure should be based on actual sleep data, not guessing.
+   chips:['Yes, DME booked','Where should I buy?','Continue journey']
+  })
+ },
+ { test:t=>has(t,'why do i need sleep study','why do i need a sleep study','why sleep study'), reply:()=>({
+   text:`Because CPAP pressure should be based on actual sleep data, not guessing.
 
 The sleep study tells:
-• Whether the patient has obstructive sleep apnea
+• Whether you have obstructive sleep apnea
 • Severity through AHI
 • Oxygen drops during sleep
 • Whether CPAP/APAP is appropriate
 
-Without this, the patient may buy the wrong product, wrong pressure range, or wrong mask support.`,
-      chips:['Start CPAP journey','What is AHI?','I am worried about cost']
-    })
-  },
-  { test:t=>has(t,'why is prescription needed','need prescription','why prescription'), reply:()=>({
-      text:`A prescription is needed because CPAP is a clinical therapy, not just a normal device.
+Without this, you may buy the wrong product, wrong pressure range, or wrong mask support.`,
+   chips:['Start CPAP journey','What is AHI?','I am worried about cost']
+  })
+ },
+ { test:t=>has(t,'why is prescription needed','need prescription','why prescription'), reply:()=>({
+   text:`A prescription is needed because CPAP is a clinical therapy, not just a normal device.
 
 The prescription tells the provider:
 • Device type: CPAP, APAP, or BiPAP
 • Pressure or pressure range
 • Any comfort settings or mask recommendation
 
-It also protects the patient from buying an unsuitable machine.`,
-      chips:['Yes, I have prescription','Doctor appointment booked','Continue journey']
-    })
-  },
-  { test:t=>has(t,'what is ahi','ahi','apnea hypopnea'), reply:()=>({
-      text:`**AHI = Apnea-Hypopnea Index**
+It also protects you from buying an unsuitable machine.`,
+   chips:['Yes, I have prescription','Doctor appointment booked','Continue journey']
+  })
+ },
+ { test:t=>has(t,'what is ahi','ahi','apnea hypopnea'), reply:()=>({
+   text:`**AHI = Apnea-Hypopnea Index**
 It means the number of breathing pauses or shallow breathing events per hour of sleep.
 
 General categories:
@@ -600,11 +648,11 @@ General categories:
 • Severe OSA: 30+
 
 Doctors use AHI, symptoms, oxygen drops, and medical history to decide treatment.`,
-      chips:['Yes, diagnosis received','Why is prescription needed?','Continue journey']
-    })
-  },
-  { test:t=>has(t,'i think i have sleep apnea','symptom','snore','snoring','tired','gasp','choking','stop breathing','daytime sleep'), reply:()=>({
-      text:`Possible sleep apnea signs:
+   chips:['Yes, diagnosis received','Why is prescription needed?','Continue journey']
+  })
+ },
+ { test:t=>has(t,'i think i have sleep apnea','symptom','snore','snoring','tired','gasp','choking','stop breathing','daytime sleep'), reply:()=>({
+   text:`Possible sleep apnea signs:
 • Loud snoring
 • Gasping/choking during sleep
 • Someone notices breathing pauses
@@ -612,24 +660,24 @@ Doctors use AHI, symptoms, oxygen drops, and medical history to decide treatment
 • Daytime sleepiness or brain fog
 • High blood pressure or poor sleep quality
 
-If these fit, the chatbot should push the patient to **book a sleep diagnosis clinic**, not directly buy CPAP.`,
-      chips:['Start CPAP journey','Why do I need a sleep study?','I am worried about cost']
-    })
-  },
-  { test:t=>has(t,'where should i buy','where to buy','buy safely','supplier','retailer'), reply:()=>({
-      text:`Safe buying route:
+If these fit, Philips Navigator should guide you to **book a sleep diagnosis clinic**, not directly buy CPAP.`,
+   chips:['Start CPAP journey','Why do I need a sleep study?','I am worried about cost']
+  })
+ },
+ { test:t=>has(t,'where should i buy','where to buy','buy safely','supplier','retailer'), reply:()=>({
+   text:`Safe buying route:
 
 ✅ Sleep clinic / hospital referral to DME
 ✅ Accredited DME provider
 ✅ Reputable CPAP supplier that checks prescription
 ✅ Provider that offers setup, mask fitting, warranty, and data review
 
-Avoid sellers that claim “no prescription needed” or cannot support setup and troubleshooting.`,
-      chips:['Yes, DME booked','Compare all products','Continue journey']
-    })
-  },
-  { test:t=>has(t,'what does cpap cost','cost','price','expensive'), reply:()=>({
-      text:`For this local product catalogue:
+Best option: buy through a provider that can support setup, fitting, warranty, and troubleshooting.`,
+   chips:['Yes, DME booked','Compare all products','Continue journey']
+  })
+ },
+ { test:t=>has(t,'what does cpap cost','cost','price','expensive'), reply:()=>({
+   text:`For this product catalogue:
 
 • **Auto CPAP (APAP) Therapy Package:** $275.00
 • **CPAP Cleaning & Hygiene Kit:** $60.00
@@ -639,11 +687,11 @@ Positioning:
 **APAP package** = main purchase
 **Cleaning kit** = maintenance add-on
 **Clinical review** = follow-up support after therapy starts`,
-      chips:['Compare all products','I am worried about cost','Start CPAP journey']
-    })
-  },
-  { test:t=>has(t,'adjusting','adjust','getting used','uncomfortable','dry mouth','leak','mask keeps leaking'), reply:()=>({
-      text:`Adjustment issues are common and usually fixable:
+   chips:['Compare all products','I am worried about cost','Start CPAP journey']
+  })
+ },
+ { test:t=>has(t,'adjusting','adjust','getting used','uncomfortable','dry mouth','leak','mask keeps leaking'), reply:()=>({
+   text:`Adjustment issues are common and usually fixable:
 
 • Dry mouth/nose → humidifier, heated tube, check mouth leak
 • Pressure feels strong → ramp setting or pressure review
@@ -651,77 +699,75 @@ Positioning:
 • Claustrophobic → nasal pillow / minimal mask
 • Still tired → check usage hours, residual AHI, leak rate
 
-This is where **Therapy Data Download & Clinical Review** is useful after the patient starts therapy.`,
-      chips:['Clinical review','Help me pick a mask','Compare all products']
-    })
-  }
+This is where **Therapy Data Download & Clinical Review** is useful after you start therapy.`,
+   chips:['Clinical review','Help me pick a mask','Compare all products']
+  })
+ }
 ];
 
 function respond(raw){
-  const t = raw.toLowerCase().trim();
-  const reason = reasonResponse(t);
-  if(reason) return reason;
-  const prod = productResponse(t);
-  if(prod) return prod;
-  for(const r of rules){
-    try{ if(r.test(t)) return r.reply(t); }catch(e){}
-  }
-  return {
-    text:`I can help with the local CPAP buying flow:
+ const t = raw.toLowerCase().trim();
+ const reason = reasonResponse(t);
+ if(reason) return reason;
+ const prod = productResponse(t);
+ if(prod) return prod;
+ for(const r of rules){
+  try{ if(r.test(t)) return r.reply(t); }catch(e){}
+ }
+ return {
+  text:`I can help you complete the CPAP buying flow:
 
 • Book sleep diagnosis clinic
 • Complete sleep study / diagnosis
 • See sleep doctor and get prescription
 • Book DME provider
 • Choose CPAP package/products
-• Handle patient drop-off concerns like cost, fear, or confusion
+• Recommend the APAP package, cleaning kit, and clinical review at the right point
+• Handle questions that usually stop you from buying, like cost, fear of masks, or confusion about the next step
 
 What do you want to do?`,
-    chips:['Start CPAP journey','Explain the stages','Compare all products','I am worried about cost']
-  };
+  chips:['Start CPAP journey','Explain the stages','Compare all products','I am worried about cost']
+ };
 }
 
 function handleUser(text){
-  text = (text||'').trim();
-  if(!text) return;
-  addMsg(text,'user');
-  input.value='';
-  input.style.height='auto';
-  setChips([]);
-  showTyping();
-  const r = respond(text);
-  const delay = Math.min(1000, 350 + r.text.length*3);
-  setTimeout(()=>{
-    hideTyping();
-    addMsg(r.text,'bot');
-    setChips(r.chips);
-    updateProgress();
-  }, delay);
+ text = (text||'').trim();
+ if(!text) return;
+ addMsg(text,'user');
+ input.value='';
+ input.style.height='auto';
+ setChips([]);
+ showTyping();
+ const r = respond(text);
+ const delay = Math.min(1000, 350 + r.text.length*3);
+ setTimeout(()=>{
+  hideTyping();
+  addMsg(r.text,'bot');
+  setChips(r.chips);
+  updateProgress();
+ }, delay);
 }
 
 sendBtn.onclick=()=>handleUser(input.value);
 input.addEventListener('keydown',e=>{
-  if(e.key==='Enter' && !e.shiftKey){e.preventDefault();handleUser(input.value);}
+ if(e.key==='Enter' && !e.shiftKey){e.preventDefault();handleUser(input.value);}
 });
 input.addEventListener('input',()=>{
-  input.style.height='auto';
-  input.style.height=Math.min(input.scrollHeight,110)+'px';
+ input.style.height='auto';
+ input.style.height=Math.min(input.scrollHeight,110)+'px';
 });
 
 window.addEventListener('load',()=>{
-  renderProducts();
-  updateProgress();
-  setTimeout(()=>{
-    addMsg(`Hi, I'm **BreatheWell** 🫁
+ renderProducts();
+ updateProgress();
+ setTimeout(()=>{
+  addMsg(`Hey — you visited our website recently and dropped your details, but you have not booked a **home sleep test** yet.
 
-I am a **local-only chatbot** for guiding patients to buy CPAP — no API, no ChatGPT call, just built-in Q&A rules.
+I'm **Philips Navigator** 🫁. I can help you continue from that drop-off point, book the home sleep test, and move you toward choosing the right CPAP package, add-ons, and review service.
 
-I can move the patient through:
-**sleep diagnosis clinic → sleep study → sleep doctor/prescription → DME provider → CPAP product selection**.
-
-Start the journey?`,'bot');
-    setChips(['Start CPAP journey','Explain the stages','Compare all products','I think I have sleep apnea']);
-  },300);
+Start with the home sleep test?`,'bot');
+  setChips(['Start CPAP journey','Explain the stages','Compare all products','I think I have sleep apnea']);
+ },300);
 });
 </script>
 </body>
