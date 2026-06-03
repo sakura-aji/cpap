@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BreatheWell — CPAP Health Companion</title>
+<style>
+  :root{
+    --bg:#eef3f8;
+    --panel:#ffffff;
+    --brand:#1f7a8c;
+    --brand-dark:#15596a;
+    --brand-soft:#e3f1f4;
+    --user:#1f7a8c;
+    --bot:#f1f5f9;
+    --text:#1f2a33;
+    --muted:#6b7c89;
+    --line:#e2e8f0;
+    --accent:#0fb5a5;
+    --warn:#b54708;
+    --warn-bg:#fff6ed;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(135deg,#dfeaf2,#eef3f8);min-height:100vh;color:var(--text);
+    display:flex;align-items:center;justify-content:center;padding:16px;
+  }
+  .app{
+    width:100%;max-width:460px;height:min(820px,94vh);background:var(--panel);
+    border-radius:22px;box-shadow:0 24px 60px rgba(20,60,80,.22);
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  header{
+    background:linear-gradient(135deg,var(--brand),var(--brand-dark));color:#fff;
+    padding:16px 18px;display:flex;align-items:center;gap:12px;
+  }
+  .logo{
+    width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+  }
+  header h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
+  header p{margin:2px 0 0;font-size:12px;opacity:.85}
+  .status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;opacity:.9}
+  .dot{width:8px;height:8px;border-radius:50%;background:#7CFFB2;box-shadow:0 0 8px #7CFFB2}
+
+  #chat{flex:1;overflow-y:auto;padding:18px 16px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+  .msg{max-width:84%;padding:11px 14px;border-radius:16px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;animation:pop .18s ease}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .bot{align-self:flex-start;background:var(--bot);color:var(--text);border-bottom-left-radius:5px}
+  .user{align-self:flex-end;background:var(--user);color:#fff;border-bottom-right-radius:5px}
+  .msg a{color:var(--brand-dark)}
+  .user a{color:#dff}
+  .msg b{font-weight:700}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 6px;background:var(--bg)}
+  .chip{
+    background:#fff;border:1px solid var(--brand);color:var(--brand-dark);
+    padding:7px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;transition:.15s;font-weight:600;
+  }
+  .chip:hover{background:var(--brand);color:#fff}
+
+  .typing{align-self:flex-start;background:var(--bot);padding:13px 16px;border-radius:16px;border-bottom-left-radius:5px;display:flex;gap:4px}
+  .typing span{width:7px;height:7px;background:#9bb0bd;border-radius:50%;animation:bounce 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}
+  .typing span:nth-child(3){animation-delay:.4s}
+  @keyframes bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+
+  footer{padding:12px;border-top:1px solid var(--line);background:#fff}
+  .inputbar{display:flex;gap:8px;align-items:flex-end}
+  #input{
+    flex:1;border:1px solid var(--line);border-radius:22px;padding:11px 15px;font-size:14.5px;
+    resize:none;max-height:110px;outline:none;font-family:inherit;line-height:1.4;
+  }
+  #input:focus{border-color:var(--brand)}
+  #send{
+    background:var(--brand);color:#fff;border:none;width:44px;height:44px;border-radius:50%;
+    font-size:19px;cursor:pointer;flex-shrink:0;transition:.15s;display:flex;align-items:center;justify-content:center;
+  }
+  #send:hover{background:var(--brand-dark)}
+  .disclaimer{font-size:10.5px;color:var(--muted);text-align:center;margin-top:8px;line-height:1.4}
+  .pill{display:inline-block;background:var(--warn-bg);color:var(--warn);border-radius:8px;padding:8px 10px;font-size:12.5px;margin-top:6px;line-height:1.45}
+  #chat::-webkit-scrollbar{width:7px}
+  #chat::-webkit-scrollbar-thumb{background:#cfdae3;border-radius:8px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="logo">🫁</div>
+    <div>
+      <h1>BreatheWell</h1>
+      <p>Your CPAP &amp; sleep apnea companion</p>
+    </div>
+    <div class="status"><span class="dot"></span>Online</div>
+  </header>
+
+  <div id="chat"></div>
+  <div class="chips" id="chips"></div>
+
+  <footer>
+    <div class="inputbar">
+      <textarea id="input" rows="1" placeholder="Ask about sleep apnea or CPAP…"></textarea>
+      <button id="send" title="Send">➤</button>
+    </div>
+    <div class="disclaimer">⚕️ BreatheWell offers general education, not medical advice. A sleep study and a clinician's prescription are required before buying a CPAP.</div>
+  </footer>
+</div>
+
+<script>
+const chat = document.getElementById('chat');
+const chipsEl = document.getElementById('chips');
+const input = document.getElementById('input');
+const sendBtn = document.getElementById('send');
+
+/* ---------- conversation memory ---------- */
+const state = { name:null, hasDiagnosis:null, lastTopic:null, recCount:0 };
+
+/* ---------- helpers ---------- */
+function escapeHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function format(s){
+  // very light markdown: **bold** and line breaks already preserved by pre-wrap
+  return escapeHtml(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>');
+}
+function addMsg(text, who){
+  const d = document.createElement('div');
+  d.className = 'msg ' + who;
+  d.innerHTML = format(text);
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+}
+function showTyping(){
+  const t = document.createElement('div');
+  t.className='typing';t.id='typing';
+  t.innerHTML='<span></span><span></span><span></span>';
+  chat.appendChild(t);chat.scrollTop=chat.scrollHeight;
+}
+function hideTyping(){const t=document.getElementById('typing');if(t)t.remove();}
+
+function setChips(list){
+  chipsEl.innerHTML='';
+  (list||[]).forEach(label=>{
+    const c=document.createElement('div');
+    c.className='chip';c.textContent=label;
+    c.onclick=()=>{handleUser(label);};
+    chipsEl.appendChild(c);
+  });
+}
+
+/* ---------- the "brain": ordered intent rules ---------- */
+const has = (t,...words)=>words.some(w=>t.includes(w));
+
+const rules = [
+  /* greetings */
+  {
+    test:t=>/^(hi|hey|hello|yo|hiya|good (morning|afternoon|evening))\b/.test(t),
+    reply:()=>({
+      text:`Hi! I'm BreatheWell 👋 I help people understand **sleep apnea** and choose the right **CPAP** setup.\n\nWhat would you like to start with?`,
+      chips:["I think I have sleep apnea","I have a prescription","How does CPAP work?","Help me choose a CPAP"]
+    })
+  },
+  /* name capture */
+  {
+    test:t=>/\b(my name is|i'm|i am|call me)\b/.test(t) && !has(t,'apnea','tired','cpap','mask'),
+    reply:t=>{
+      const m=t.match(/(?:my name is|i'm|i am|call me)\s+([a-z]+)/i);
+      if(m){state.name=m[1][0].toUpperCase()+m[1].slice(1);}
+      return {text:`Nice to meet you${state.name?', '+state.name:''}! 😊 How can I help with your sleep or CPAP today?`,
+        chips:["What is sleep apnea?","Symptoms I should watch for","Help me choose a CPAP"]};
+    }
+  },
+  /* symptoms / "do I have it" */
+  {
+    test:t=>has(t,'symptom','do i have','think i have','might have','snore','snoring','tired','exhausted','gasp','choking','stop breathing','daytime sleep','wake up'),
+    reply:()=>{
+      state.lastTopic='symptoms';
+      return {text:`Common signs of **obstructive sleep apnea** include:\n\n• Loud, chronic snoring\n• Gasping or choking awake at night\n• A partner noticing you stop breathing\n• Waking unrefreshed; morning headaches\n• Daytime sleepiness, brain fog, irritability\n• Trouble concentrating\n\nIf several sound familiar, the next step is a **sleep study** (in-lab or an at-home test) so a doctor can confirm it and grade the severity (your AHI).\n\nWant me to explain how diagnosis works, or what therapy looks like?`,
+        chips:["How is it diagnosed?","What's an AHI?","How does CPAP help?","Take a quick self-check"]};
+    }
+  },
+  /* self check quiz (STOP-BANG-ish, simplified & non-diagnostic) */
+  {
+    test:t=>has(t,'self-check','self check','quiz','quick check','screen me','am i at risk'),
+    reply:()=>({
+      text:`Here's a quick informal screen (this is **not** a diagnosis):\n\n1. Do you snore loudly?\n2. Are you often tired during the day?\n3. Has anyone seen you stop breathing in your sleep?\n4. Do you have high blood pressure?\n5. Is your BMI over 35?\n6. Are you over 50?\n7. Is your neck circumference large (>40cm/16in)?\n8. Are you male?\n\nIf you answered **yes to 3 or more**, your risk is elevated and it's worth talking to a doctor about a sleep study. Want help understanding the next steps?`,
+      chips:["Yes, 3 or more","How is it diagnosed?","Book the next step"]
+    })
+  },
+  {
+    test:t=>has(t,'3 or more','yes 3','more than 3','five','four','several yes'),
+    reply:()=>({
+      text:`Thanks for sharing. An elevated screen doesn't mean you definitely have apnea — but it's a strong reason to get a **sleep study**.\n\nA doctor can order an at-home test (a small device you wear one night) or an in-lab study. Once you have a diagnosis and a prescription, I can help you pick the right CPAP. Shall I walk you through diagnosis?`,
+      chips:["How is it diagnosed?","What does therapy cost?","Help me choose a CPAP"]
+    })
+  },
+  /* diagnosis */
+  {
+    test:t=>has(t,'diagnos','sleep study','sleep test','polysomnography','home test','test for'),
+    reply:()=>{
+      state.lastTopic='diagnosis';
+      return {text:`Sleep apnea is diagnosed with a **sleep study**, in one of two ways:\n\n**1. Home Sleep Apnea Test (HSAT)** — a small kit you wear for one night at home. Convenient and lower cost; good for suspected moderate–severe OSA.\n\n**2. In-lab polysomnography** — an overnight stay where techs monitor breathing, oxygen, heart rate and brain waves. More thorough.\n\nThe result is your **AHI** (apnea-hypopnea index = breathing events per hour). It grades severity and the doctor uses it to write your CPAP prescription with the right pressure.\n\nDo you already have a diagnosis or prescription?`,
+        chips:["Yes, I have a prescription","Not yet","What's an AHI?"]};
+    }
+  },
+  {
+    test:t=>/\bahi\b/.test(t)||has(t,'apnea-hypopnea','events per hour','severity'),
+    reply:()=>({
+      text:`**AHI = Apnea-Hypopnea Index**, the number of times per hour your breathing pauses or gets shallow:\n\n• **Normal:** under 5\n• **Mild:** 5–15\n• **Moderate:** 15–30\n• **Severe:** 30+\n\nCPAP is typically recommended for moderate and severe OSA, and often for mild OSA when there are symptoms. Your prescription will list a pressure (in cmH₂O) based on this.`,
+      chips:["How does CPAP work?","Help me choose a CPAP","Types of CPAP machines"]
+    })
+  },
+  /* prescription path */
+  {
+    test:t=>has(t,'prescription','prescribed','i have a script','rx','my doctor said','was diagnosed','already diagnosed','have apnea','have osa'),
+    reply:()=>{
+      state.hasDiagnosis=true;
+      return {text:`Great — having a **prescription** is exactly what you need to buy a CPAP. 🎯 In most places a valid Rx is legally required.\n\nYour script usually specifies:\n• The **device type** (fixed CPAP, Auto/APAP, or BiPAP)\n• The **pressure setting** (e.g. 4–20 cmH₂O)\n• Sometimes a specific machine\n\nLet's match you to the right setup. A few quick questions — first: **how do you breathe at night, through your nose or do you often breathe through your mouth / feel congested?**`,
+        chips:["Mostly through my nose","I breathe through my mouth","I get congested a lot","I'm claustrophobic"]};
+    }
+  },
+  /* how CPAP works */
+  {
+    test:t=>has(t,'how does cpap','what is cpap','what does cpap','how cpap work','explain cpap','cpap do'),
+    reply:()=>{
+      state.lastTopic='howitworks';
+      return {text:`**CPAP** = Continuous Positive Airway Pressure. 🌬️\n\nIt's a small bedside machine that gently blows pressurized air through a hose and mask. That steady air acts like a splint, keeping your throat from collapsing so you don't stop breathing.\n\nResult: no more apnea events, deeper sleep, more energy, and lower long-term risk to your heart and blood pressure.\n\nThe full kit is: **machine + mask + hose + filter**, usually with a built-in humidifier. Want to see the machine types or how to pick a mask?`,
+        chips:["Types of CPAP machines","Help me pick a mask","Help me choose a CPAP","What does it cost?"]};
+    }
+  },
+  /* machine types */
+  {
+    test:t=>has(t,'type','apap','auto','bipap','bilevel','fixed','difference between','kinds of machine','which machine'),
+    reply:()=>({
+      text:`Three main machine types:\n\n**CPAP (fixed)** — delivers one constant pressure all night. Simple and usually cheapest. Good if your prescribed pressure is stable.\n\n**APAP (Auto-CPAP)** — automatically adjusts pressure breath-by-breath within a range. The most popular today; comfortable for most people and adapts to position/sleep stage.\n\n**BiPAP (bilevel)** — separate higher pressure for breathing in and lower for breathing out. Used for high pressures, certain conditions, or when CPAP feels hard to exhale against. Usually needs a specific prescription.\n\nFor most newly-diagnosed people, an **APAP** is the flexible default. Want me to recommend specific reputable models?`,
+      chips:["Recommend models","Help me pick a mask","What does it cost?"]
+    })
+  },
+  /* masks */
+  {
+    test:t=>has(t,'mask','nasal','pillow','full face','cushion','claustrophob','beard','through my nose','through my mouth','breathe through'),
+    reply:t=>{
+      let lead = `Mask fit matters more than the machine — it's the #1 reason people stick with therapy. Three styles:`;
+      if(has(t,'claustrophob')) lead = `Totally common — many people feel boxed in at first. The good news: **nasal pillow masks** are the most minimal and open option, so let's start there.`;
+      if(has(t,'mouth')) lead = `Since you breathe through your mouth, a **full-face mask** (or a chin strap with a nasal mask) usually works best so air doesn't leak out. Here are the styles:`;
+      if(has(t,'congest')) lead = `Congestion is worth solving — a heated **humidifier** helps a lot, and a **full-face mask** gives you a mouth backup on stuffy nights. The styles:`;
+      return {text:`${lead}\n\n**Nasal pillow** — tiny tips that sit at the nostrils. Minimal, great for active sleepers, beards, glasses, and claustrophobia. Best for lower pressures.\n\n**Nasal mask** — a small cushion over the nose. A versatile middle ground; handles higher pressures than pillows.\n\n**Full-face mask** — covers nose and mouth. Best for mouth-breathers, congestion, or high pressures.\n\nWant model recommendations, or to talk fit/sizing tips?`,
+        chips:["Recommend models","Fit & sizing tips","Help me choose a CPAP","What does it cost?"]};
+    }
+  },
+  /* guided recommendation flow */
+  {
+    test:t=>has(t,'choose','recommend','which one','what should i buy','help me buy','help me pick','best cpap','suggest','what to get','guide me') && !has(t,'model','brand','mask','pillow'),
+    reply:()=>{
+      state.lastTopic='choose';
+      if(state.hasDiagnosis===false){
+        return {text:`Happy to guide you! One important thing first: you'll need a **diagnosis and prescription** before you can buy a CPAP. Do you have one yet?`,
+          chips:["Yes, I have a prescription","Not yet — how do I get one?"]};
+      }
+      return {text:`Let's find your match. I'll ask 3 quick things, then suggest a setup.\n\n**1 of 3 — Do you have a prescription yet?** (legally required to purchase)`,
+        chips:["Yes, I have one","Not yet"]};
+    }
+  },
+  {
+    test:t=>has(t,'not yet','no i','don\'t have','dont have','no prescription','need one','how do i get one','no script'),
+    reply:()=>{
+      state.hasDiagnosis=false;
+      return {text:`No problem — here's the path:\n\n1. **Talk to your doctor** about your symptoms (or a sleep clinic directly).\n2. **Do a sleep study** — at-home kit or in-lab.\n3. **Get your results + prescription** with the recommended pressure.\n4. Then I'll help you buy the right machine and mask. 🛒\n\nWould you like a quick rundown of symptoms to mention to your doctor?`,
+        chips:["Symptoms to mention","How is it diagnosed?","What does it cost?"]};
+    }
+  },
+  {
+    test:t=>has(t,'mostly through my nose','through my nose','nose breather','nasal breather'),
+    reply:()=>({
+      text:`Nose breather — nice, that opens up the comfiest options. 👃\n\nFor a typical newly-diagnosed nose breather I'd suggest:\n• **Machine:** an **APAP** (auto-adjusting) for comfort and flexibility\n• **Mask:** start with a **nasal pillow** or **nasal mask**\n• **Add:** a heated humidifier (usually built-in) + heated hose to prevent dryness\n\nWant specific reputable model names, or the typical cost breakdown?`,
+      chips:["Recommend models","What does it cost?","Fit & sizing tips"]
+    })
+  },
+  /* model recommendations */
+  {
+    test:t=>has(t,'model','brand','specific','names','reputable','resmed','philips','airsense','which brand'),
+    reply:()=>{
+      state.recCount++;
+      return {text:`Widely-respected, commonly-prescribed options (availability varies by country and your Rx):\n\n**Auto-CPAP (APAP) machines**\n• ResMed AirSense 11 AutoSet — quiet, great app (myAir), built-in humidifier\n• ResMed AirSense 10 AutoSet — proven workhorse, often lower price\n• React Health Luna G3 / other APAPs — budget-friendly alternatives\n\n**Masks**\n• Nasal pillow: ResMed AirFit P10 / P30i\n• Nasal: ResMed AirFit N20 / N30i\n• Full-face: ResMed AirFit F20 / F30i\n\nTip: buy from an accredited **DME supplier** or reputable retailer that verifies your prescription — avoid sketchy "no-Rx" sellers. Want the cost breakdown or insurance tips?`,
+        chips:["What does it cost?","Insurance & financing","Fit & sizing tips","Where to buy safely"]};
+    }
+  },
+  /* cost */
+  {
+    test:t=>has(t,'cost','price','expensive','how much','afford','cheap','budget','pay'),
+    reply:()=>({
+      text:`Rough ballpark (varies a lot by region, brand and insurance):\n\n• **Machine (APAP):** ~$500–$1,000\n• **Mask:** ~$80–$200 (replace cushions regularly)\n• **Supplies/year:** hoses, filters, cushions ~$200–$400\n\nWith insurance you may pay only a copay, or rent-to-own through a DME supplier. Many people also buy out-of-pocket online to save.\n\nWant tips on using insurance, or where to buy safely?`,
+      chips:["Insurance & financing","Where to buy safely","Recommend models"]
+    })
+  },
+  {
+    test:t=>has(t,'insurance','financing','coverage','medicare','copay','hsa','fsa','rent'),
+    reply:()=>({
+      text:`**Insurance & financing notes:**\n\n• Most plans (and Medicare) cover CPAP if you have a qualifying diagnosis and a prescription — often as a **rental that converts to ownership** after a compliance period.\n• Insurers usually require **usage data** (≈4+ hrs/night) from the machine to keep covering it — modern machines report this automatically.\n• **HSA/FSA** funds can typically be used for CPAP equipment.\n• Out-of-pocket online can sometimes be cheaper than a copay — worth comparing.\n\nAlways confirm specifics with your provider and insurer. Want safe places to buy?`,
+      chips:["Where to buy safely","What does it cost?","Recommend models"]
+    })
+  },
+  {
+    test:t=>has(t,'where to buy','where do i buy','buy safely','purchase','order','online','retailer','supplier','shop'),
+    reply:()=>({
+      text:`**Buying safely:**\n\n✅ Use an **accredited DME (durable medical equipment) supplier** — often arranged through your sleep clinic or insurer.\n✅ Reputable online CPAP retailers that **verify your prescription** before shipping.\n✅ Manufacturer-authorized sellers for warranty coverage.\n\n🚩 Avoid: sellers advertising "**no prescription needed**", used machines from individuals (hygiene + no warranty), and prices that seem too good to be true.\n\nHave your prescription handy when ordering — you'll usually upload or email it. Want a fit & sizing checklist before you order a mask?`,
+      chips:["Fit & sizing tips","Recommend models","Insurance & financing"]
+    })
+  },
+  /* fit & sizing */
+  {
+    test:t=>has(t,'fit','sizing','size','leak','leaking','comfortable','comfort','adjust','strap'),
+    reply:()=>({
+      text:`**Fit & sizing tips:**\n\n• Most masks come in S/M/L cushions — many retailers offer a **fit pack** with multiple sizes.\n• Fit it **lying down**, in your normal sleep position — your face changes shape.\n• Snug, not tight: over-tightening actually causes more leaks and red marks.\n• A little air leak is normal; aim to stop leaks into your **eyes**.\n• Glasses-wearer or reader? **Nasal pillows** or "i-style" masks (tube at the top of the head) keep your line of sight clear.\n• Clean the cushion daily with mild soap to keep a good seal.\n\nWant help choosing between mask styles, or model picks?`,
+      chips:["Help me pick a mask","Recommend models","Tips for adjusting to CPAP"]
+    })
+  },
+  /* adjusting / compliance */
+  {
+    test:t=>has(t,'adjust','getting used','can\'t sleep with','hate it','uncomfortable','stop using','give up','dry mouth','dry nose','ramp','noise','loud','bloating','aerophagia'),
+    reply:()=>({
+      text:`The first 2–3 weeks are the hardest — most struggles are fixable:\n\n• **Dry mouth/nose:** turn up the **humidifier**, add a heated hose; mouth-breathers may need a full-face mask or chin strap.\n• **Pressure feels strong:** use the **ramp** feature (starts low, rises as you fall asleep).\n• **Air swallowing/bloating (aerophagia):** ask about lowering pressure or switching to BiPAP/EPR.\n• **Mask leaks/marks:** re-check size and loosen slightly.\n• **Noise:** modern machines are very quiet (~26 dB) — check the filter and hose connection.\n\nWear it a little during the day (watching TV) to get used to it. Stick with it — comfort usually clicks within a few weeks. Anything specific bugging you?`,
+      chips:["Dry mouth help","Mask keeps leaking","Help me pick a mask"]
+    })
+  },
+  /* cleaning */
+  {
+    test:t=>has(t,'clean','wash','hygiene','maintenance','replace','how often','sanitize'),
+    reply:()=>({
+      text:`**Keeping it clean & healthy:**\n\n• **Daily:** wipe the mask cushion; empty/refill the humidifier with distilled water.\n• **Weekly:** wash mask, hose and water chamber in warm soapy water; air-dry.\n• **Replacement schedule (typical):** cushions every 2–4 weeks, mask every 3 months, hose every 3 months, filters every 1–2 weeks, water chamber every 6 months.\n\nSkip ozone/UV "CPAP cleaners" unless your manufacturer approves them — soap and water is the recommended standard. Want the supply cost breakdown?`,
+      chips:["What does it cost?","Insurance & financing","Recommend models"]
+    })
+  },
+  /* benefits */
+  {
+    test:t=>has(t,'benefit','worth it','help me','why use','what happens if i don','untreated','risk','heart','blood pressure'),
+    reply:()=>({
+      text:`Treating sleep apnea is genuinely worth it. Benefits people report:\n\n• More daytime energy, less brain fog\n• Better mood and concentration\n• Less snoring (partners sleep better too 😴)\n• Lower blood pressure\n\nUntreated OSA raises the long-term risk of **high blood pressure, heart disease, stroke, type 2 diabetes, and accidents from drowsiness** — which is why doctors take it seriously. CPAP is the most effective treatment for moderate–severe OSA. Want to look at getting started?`,
+      chips:["Help me choose a CPAP","How is it diagnosed?","Alternatives to CPAP"]
+    })
+  },
+  /* alternatives */
+  {
+    test:t=>has(t,'alternative','instead of cpap','other option','oral appliance','mouth guard','surgery','inspire','without cpap','hate cpap'),
+    reply:()=>({
+      text:`CPAP is first-line for moderate–severe OSA, but alternatives exist (discuss with your doctor):\n\n• **Oral appliances** — custom dental devices that move the jaw forward; good for mild–moderate OSA or CPAP-intolerant patients.\n• **Positional therapy** — if apnea only happens on your back.\n• **Weight loss** — can significantly reduce or resolve mild OSA.\n• **Surgery / implants** (e.g. hypoglossal nerve stimulation) — for select cases.\n\nMany people who "can't do CPAP" just had a fit or pressure problem that's fixable — worth troubleshooting before giving up. Want adjustment tips?`,
+      chips:["Tips for adjusting to CPAP","Help me pick a mask","How does CPAP work?"]
+    })
+  },
+  /* travel */
+  {
+    test:t=>has(t,'travel','flight','airplane','portable','camping','battery'),
+    reply:()=>({
+      text:`**Travel with CPAP:**\n\n• CPAPs are FAA-approved as **carry-on medical devices** — they don't count toward your bag limit. Bring a copy of your prescription.\n• **Travel models** (e.g. ResMed AirMini) are palm-sized for trips.\n• For camping/off-grid, get a **CPAP battery pack** matched to your machine.\n• Use distilled water for the humidifier, or run waterless on short trips.\n\nWant model picks or a supply checklist?`,
+      chips:["Recommend models","Fit & sizing tips","What does it cost?"]
+    })
+  },
+  /* emergency / red flags */
+  {
+    test:t=>has(t,'chest pain','can\'t breathe','cant breathe','emergency','suicid','heart attack','severe pain','help me now'),
+    reply:()=>({
+      text:`⚠️ If you're having a medical emergency — chest pain, severe trouble breathing, or you feel unsafe — please **stop and contact emergency services now** (e.g. call 911 / your local emergency number) or go to the nearest ER.\n\nI'm an education tool and can't help in an emergency. Please reach out to a real person right away.`,
+      chips:[]
+    })
+  },
+  /* thanks */
+  {
+    test:t=>has(t,'thank','thanks','appreciate','helpful','great'),
+    reply:()=>({
+      text:`You're very welcome${state.name?', '+state.name:''}! 💙 Breathing easier makes a huge difference. I'm here whenever you have more questions about sleep apnea or CPAP.`,
+      chips:["Help me choose a CPAP","Tips for adjusting to CPAP","What does it cost?"]
+    })
+  },
+  /* bye */
+  {
+    test:t=>/^(bye|goodbye|see ya|that's all|thats all|done)\b/.test(t),
+    reply:()=>({
+      text:`Take care and sleep well! 😴 Come back anytime — and remember to follow up with your doctor for anything clinical. 🫁`,
+      chips:[]
+    })
+  },
+];
+
+/* fallback */
+function fallback(){
+  return {
+    text:`I'm focused on **sleep apnea and CPAP** so I can give you reliable guidance. I can help with:\n\n• Symptoms & whether to get tested\n• How diagnosis and AHI work\n• How CPAP works and the machine types\n• Choosing a machine + mask for you\n• Cost, insurance and where to buy safely\n• Getting comfortable & cleaning\n\nWhat would you like to explore?`,
+    chips:["I think I have sleep apnea","How does CPAP work?","Help me choose a CPAP","What does it cost?"]
+  };
+}
+
+function respond(raw){
+  const t = raw.toLowerCase().trim();
+  for(const r of rules){
+    try{ if(r.test(t)) return r.reply(t); }catch(e){}
+  }
+  return fallback();
+}
+
+/* ---------- send pipeline ---------- */
+function handleUser(text){
+  text = (text||'').trim();
+  if(!text) return;
+  addMsg(text,'user');
+  input.value='';
+  input.style.height='auto';
+  setChips([]);
+  showTyping();
+  const r = respond(text);
+  const delay = Math.min(1400, 500 + r.text.length*4);
+  setTimeout(()=>{
+    hideTyping();
+    addMsg(r.text,'bot');
+    setChips(r.chips);
+  }, delay);
+}
+
+sendBtn.onclick=()=>handleUser(input.value);
+input.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.shiftKey){e.preventDefault();handleUser(input.value);}
+});
+input.addEventListener('input',()=>{
+  input.style.height='auto';
+  input.style.height=Math.min(input.scrollHeight,110)+'px';
+});
+
+/* ---------- opening message ---------- */
+window.addEventListener('load',()=>{
+  setTimeout(()=>{
+    addMsg(`Hi, I'm **BreatheWell** 🫁 — your friendly companion for understanding **sleep apnea** and finding the right **CPAP**.\n\nI can explain symptoms, how diagnosis works, and walk you step-by-step through choosing and buying the right machine and mask.\n\nWhere would you like to start?`,'bot');
+    setChips(["I think I have sleep apnea","How does CPAP work?","Help me choose a CPAP","What does it cost?"]);
+  },400);
+});
+</script>
+</body>
+</html>
