@@ -63,6 +63,14 @@
  header p{margin:2px 0 0;font-size:12px;opacity:.86}
  .status{margin-left:auto;display:flex;align-items:center;gap:6px;font-size:11px;opacity:.9}
  .dot{width:8px;height:8px;border-radius:50%;background:#7CFFB2;box-shadow:0 0 8px #7CFFB2}
+ .ctx{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;min-height:0}
+ .ctx:empty{display:none}
+ .ctx-pill{
+  display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.22);color:#fff;font-size:11px;font-weight:700;
+  padding:5px 10px;border-radius:999px;
+ }
+ .ctx-pill span{opacity:.75;font-weight:600}
 
  .scope{
   background:#fff;
@@ -82,6 +90,7 @@
   cursor:pointer;
   transition:.15s;
  }
+ .device.active{border-color:var(--brand);box-shadow:0 0 0 2px var(--brand-soft)}
  .device:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(15,23,42,.08)}
  .device-visual{
   height:96px;
@@ -132,6 +141,8 @@
  .chip:hover{background:var(--brand);color:#fff}
  .chip.secondary{border-color:#d0d5dd;color:#344054}
  .chip.secondary:hover{background:#344054;color:#fff}
+ .chip.good-chip{border-color:#0f766e;color:#0f766e}
+ .chip.good-chip:hover{background:#0f766e;color:#fff}
  .chip.danger-chip{border-color:#f04438;color:#b42318}
  .chip.danger-chip:hover{background:#b42318;color:#fff}
 
@@ -166,6 +177,7 @@
    </div>
    <div class="status"><span class="dot"></span>Service mode</div>
   </div>
+  <div class="ctx" id="ctx"></div>
  </header>
 
  <section class="scope">
@@ -194,152 +206,233 @@ const chipsEl = document.getElementById('chips');
 const input = document.getElementById('input');
 const sendBtn = document.getElementById('send');
 const devicesEl = document.getElementById('devices');
+const ctxEl = document.getElementById('ctx');
 
-/*
-  SERVICE KNOWLEDGE BASE — approved Philips service content.
-  Current coverage: DreamStation 1 Auto CPAP and DreamStation 2 Auto CPAP.
-*/
+/* ============================================================
+   SERVICE KNOWLEDGE BASE — approved Philips service content.
+   Coverage: DreamStation 1 Auto CPAP & DreamStation 2 Auto CPAP.
+   ============================================================ */
 const devices = [
  {
   id:'dreamstation-1',
   image:'https://www.philips.com.sg/c-dam/b2c/master/experience/hs/sleep-apnea-therapy/sleep-apnea-machines/dreamstation-intro.jpg',
   name:'DreamStation 1 Auto CPAP',
-  short:'Setup, mask fit, humidifier, tubing, device noise, leak, and basic usage support.',
-  tag:'Supported device'
+  short:'Button + dial control, side-loading humidifier, optional modem. Setup, mask fit, noise, humidifier, comfort and data support.',
+  tag:'Supported device',
+  notes:'Controls use the front dial and buttons. Humidifier slides in from the side. Filter is reusable (blue) + optional disposable (white).'
  },
  {
   id:'dreamstation-2',
   image:'https://images.philips.com/is/image/philipsconsumer/49159a1299154c0ebe37ac62013820b0?$jpglarge$&wid=420&hei=360',
   name:'DreamStation 2 Auto CPAP',
-  short:'Auto CPAP setup, comfort settings, mask/tube checks, humidifier, alerts, and escalation.',
-  tag:'Supported device'
+  short:'Touchscreen control, drop-in top humidifier, built-in Bluetooth/cellular. Setup, comfort, mask/tube checks, alerts and escalation.',
+  tag:'Supported device',
+  notes:'Controls use the colour touchscreen. Humidifier drops in from the top. Uses a single ultra-fine disposable filter. Heated tube connects at the rear.'
  }
 ];
 
-const state = {
- device:null,
- issueType:null,
- confidence:0,
- answered:false,
- escalated:false
-};
-
-const issueTypes = {
- setup:'Setup guidance',
- mask:'Mask / fit / leak',
- noise:'Device making sound',
- humidifier:'Humidifier / water / dryness',
- comfort:'Pressure / comfort issue',
- power:'Power / startup issue',
- cleaning:'Cleaning / maintenance',
- data:'App / data / DreamMapper',
- escalation:'Escalation required'
-};
-
+/* Each KB topic can carry: answer, escalate flag, optional sub-options (drill-down),
+   per-device deltas, and related follow-up suggestions. */
 const kb = {
- setup: {
+ overview:{
+  title:'Device overview',
+  answer:`**Service answer — device overview**
+A DreamStation Auto CPAP delivers automatically-adjusting air pressure to keep the airway open during sleep.
+
+Main parts to check on every service call:
+1. Therapy device (motor/blower unit).
+2. Power supply + cord.
+3. Air tubing (standard or heated).
+4. Mask + headgear + cushion.
+5. Humidifier water chamber (optional).
+6. Air inlet filter(s).
+[note]Confirm the exact model first — DreamStation 1 and DreamStation 2 differ in controls, humidifier loading, and filters.[/note]`,
+  escalate:false,
+  related:['setup','mask','cleaning']
+ },
+ setup:{
   title:'Basic setup workflow',
   answer:`**Service answer — setup workflow**
-1. Place the CPAP device on a stable, flat surface near the bed.
-2. Connect the power supply firmly to the device and wall socket.
-3. Attach the tubing securely to the air outlet.
-4. Connect the mask to the tubing.
-5. If using humidification, fill the water chamber only up to the marked maximum line.
-6. Put on the mask and check fit before starting therapy.
-7. Start airflow and check for obvious air leak, loose tubing, abnormal sound, or error message.
-8. Confirm the patient understands cleaning, daily use, and when to report issues.
-[note]Use only the approved Philips manual/workflow as the final source. Do not invent pressure settings, clinical settings, or prescription changes.[/note]`,
-  escalate:false
+1. Place the device on a stable, flat surface, slightly below mattress height, away from heat, curtains and water.
+2. Connect the power supply firmly to the device and a working wall socket.
+3. Insert the humidifier water chamber (if used) and fill only to the marked maximum line with the approved water type.
+4. Attach the tubing securely to the air outlet (heated tube to the heated-tube port if applicable).
+5. Connect the mask to the tubing and fit the headgear.
+6. Power on and let the device run its self-check; confirm no error/alert appears.
+7. Start airflow and check for obvious leak, loose tubing, abnormal sound, or warning.
+8. Brief the patient on daily use, cleaning, and when to report issues.
+[note]Use only the approved Philips manual as the final source. Never set or change therapy pressure unless authorised.[/note]`,
+  escalate:false,
+  deltas:{
+   'dreamstation-1':'On DreamStation 1, slide the humidifier into the side of the device until it clicks. Navigate setup confirmation with the front dial.',
+   'dreamstation-2':'On DreamStation 2, drop the humidifier into the top bay and close it flush. Confirm setup on the touchscreen.'
+  },
+  related:['mask','humidifier','comfort']
  },
- mask: {
-  title:'Mask selection / mask fit',
+ mask:{
+  title:'Mask selection & fit',
   answer:`**Service answer — mask guidance**
-Mask choice should be based on breathing route, comfort, leak, facial fit, and clinician/provider recommendation.
+Mask choice depends on breathing route, comfort, leak history, facial fit, and clinician/provider recommendation.
 
-Practical guide:
-1. If the user breathes mainly through the nose, consider nasal or nasal pillow style.
-2. If the user breathes through the mouth or has mouth leak, consider full-face style or clinician review.
-3. Check that cushion size fits the face without over-tightening.
-4. Re-seat the mask while airflow is on.
-5. Check tubing connection and cushion seal.
-6. If leak continues, try another size/style or escalate to mask fitting support.
-[danger]Escalate if there is skin injury, pressure sore, severe discomfort, repeated high leak, or the user cannot tolerate the mask after fitting steps.[/danger]`,
-  escalate:true
+Decision guide:
+• Breathes mainly through the nose → nasal or nasal-pillow style.
+• Mouth breather or mouth leak → full-face style, or clinician review.
+• Claustrophobic / wants minimal contact → nasal-pillow style.
+
+Fit checklist:
+1. Pick the cushion size from the sizing guide — bigger is not better.
+2. Seat the mask with airflow ON, lying in the sleep position.
+3. Tighten headgear just until the leak stops — avoid over-tightening.
+4. Re-check the cushion seal and tubing connection.
+5. If leak continues, try another size/style or escalate to mask-fitting support.
+[danger]Escalate if there is skin injury, pressure sore, severe discomfort, persistent high leak, or the patient cannot tolerate the mask after fitting steps.[/danger]`,
+  escalate:false,
+  related:['noise','comfort','cleaning']
  },
- noise: {
+ noise:{
   title:'Device making sound',
   answer:`**Service answer — device making sound**
-First identify the sound: air leak, vibration, water/gurgling, fan/motor sound, or alarm/error.
-
-Practical checks:
-1. Check mask seal. A leak can sound like the machine is noisy.
-2. Check tubing connection at both device and mask side.
-3. Check if tubing has water inside. Drain and dry if there is condensation.
-4. Make sure the device is on a flat, stable surface and not touching the wall or loose objects.
-5. Check water chamber is inserted properly and not overfilled.
-6. Restart the device and observe whether the sound continues.
-[danger]Escalate if sound is sudden, loud, burning/electrical smell, device damage, repeated error message, water entered the device, or noise continues after basic checks.[/danger]`,
-  escalate:true
+Let's narrow down the type of sound so I can give the right fix.`,
+  escalate:false,
+  sub:{
+   prompt:'What does the sound seem like?',
+   options:{
+    'Hissing / whistling':`**Hissing or whistling — usually air leak**
+1. Re-seat the mask with airflow on and check the cushion seal.
+2. Inspect the cushion for wear, cracks, or oily film and clean/replace.
+3. Check both tubing connections are fully pushed in.
+4. Make sure mask vents are not blocked or pointed at the user.
+[note]Most "noisy machine" reports are actually mask or tube leaks.[/note]`,
+    'Gurgling / water':`**Gurgling or water sound — condensation in the tube**
+1. Drain and dry the tubing.
+2. Lower the humidifier heat or tube-temperature setting per the approved workflow.
+3. Keep the tube under the blanket or use a heated tube if available to reduce "rainout".
+4. Ensure the chamber is not overfilled.`,
+    'Rattle / vibration':`**Rattle or vibration**
+1. Confirm the device sits on a flat, stable surface, not touching a wall or loose objects.
+2. Check the humidifier chamber is fully seated and latched.
+3. Check the filter cover is properly closed.
+4. Restart and listen again.`,
+    'Loud motor / new noise':`**Loud motor or sudden new noise**
+1. Power down and inspect for visible damage or blocked air inlet.
+2. Confirm the filter is clean and correctly fitted.
+3. Restart and observe.
+[danger]Escalate if the motor noise is sudden, grinding, paired with an error/alert, a burning smell, or it continues after these checks — do not keep running a suspect device.[/danger]`
+   }
+  },
+  related:['mask','humidifier','power']
  },
- humidifier: {
-  title:'Humidifier / dryness / water issue',
+ humidifier:{
+  title:'Humidifier, dryness & water',
   answer:`**Service answer — humidifier support**
-1. Confirm the water chamber is installed correctly.
-2. Check water is below the maximum fill line.
-3. Use the correct water type according to the approved manual/local workflow.
-4. If dry mouth/nose occurs, check mask leak first because leak can worsen dryness.
-5. Check tubing for condensation or water pooling.
-6. Confirm the patient knows how to empty, clean, and refill the chamber.
-[danger]Escalate if water has entered the machine, chamber is cracked/leaking, heating issue is suspected, or dryness continues despite leak and humidifier checks.[/danger]`,
-  escalate:true
+1. Confirm the water chamber is installed and latched correctly.
+2. Fill only to the maximum line with the approved water type (typically distilled per local workflow).
+3. If dry mouth/nose persists, check mask leak first — leak dries the airway faster than low humidity.
+4. Increase humidity gradually per the approved comfort workflow.
+5. For "rainout" (water in the tube/mask), lower humidity or tube temperature, keep the tube warm, or use a heated tube.
+6. Confirm the patient can empty, clean, and refill the chamber.
+[danger]Escalate if water has entered the device, the chamber is cracked or leaking, a heating fault is suspected, or dryness persists after leak + humidifier checks.[/danger]`,
+  escalate:false,
+  deltas:{
+   'dreamstation-1':'DreamStation 1 chamber loads from the side — remove fully before filling to avoid spills into the device.',
+   'dreamstation-2':'DreamStation 2 chamber drops in from the top — always fill it away from the device and dry the base before reinserting.'
+  },
+  related:['comfort','cleaning','noise']
  },
- comfort: {
-  title:'Pressure / comfort issue',
-  answer:`**Service answer — pressure discomfort**
-1. Ask what the patient feels: too much pressure, air hunger, bloating, dry mouth, or waking up.
-2. Check mask leak and fit first.
-3. Confirm ramp/comfort features according to approved Philips workflow.
-4. Confirm tubing and mask are connected correctly.
-5. Encourage short acclimatisation while awake if allowed by the care workflow.
-[danger]Do not change prescription pressure unless authorised. Escalate to clinician/provider if pressure intolerance persists, AHI remains high, patient has chest discomfort, severe breathlessness, or therapy cannot be used.[/danger]`,
-  escalate:true
+ comfort:{
+  title:'Pressure & comfort',
+  answer:`**Service answer — pressure & comfort**
+1. Clarify the feeling: too much pressure, air hunger, bloating (aerophagia), dry mouth, or frequent waking.
+2. Check mask leak and fit first — leak distorts how pressure feels.
+3. Review comfort features per the approved workflow: Ramp (eases in a lower starting pressure) and exhalation-relief settings.
+4. Confirm tubing/mask are correctly connected and the right tube type is selected.
+5. Encourage short awake acclimatisation sessions if allowed by the care plan.
+[danger]Do not change prescription pressure unless authorised. Escalate if intolerance persists, AHI stays high, or there is chest discomfort or breathlessness.[/danger]`,
+  escalate:false,
+  deltas:{
+   'dreamstation-1':'Enable Ramp and exhalation relief via the front dial menu.',
+   'dreamstation-2':'Enable Ramp / "ramp up" and exhalation relief from the touchscreen comfort menu.'
+  },
+  related:['mask','humidifier','data']
  },
- power: {
-  title:'Power / startup issue',
-  answer:`**Service answer — power/startup issue**
-1. Check wall socket and power adapter connection.
-2. Check cable is firmly connected to the device.
-3. Try another approved wall socket.
-4. Look for error message or indicator light.
-5. Check for visible cable or device damage.
-[danger]Escalate immediately if there is burning smell, overheating, liquid exposure, damaged cable, cracked device, or device does not power on after basic checks.[/danger]`,
-  escalate:true
+ power:{
+  title:'Power & startup',
+  answer:`**Service answer — power / startup**
+1. Confirm the wall socket works (test with another appliance).
+2. Check the power cord is fully seated at both the adapter and the device.
+3. Try a different approved wall socket — avoid extension leads where possible.
+4. Look for indicator lights, screen activity, or an error/alert code.
+5. Inspect the cord and device for visible damage.
+[danger]Escalate immediately for burning smell, overheating, smoke, liquid exposure, a damaged cord, a cracked device, or no power after these checks. Do not attempt internal repair.[/danger]`,
+  escalate:false,
+  related:['noise','data']
  },
- cleaning: {
-  title:'Cleaning / maintenance',
-  answer:`**Service answer — cleaning and maintenance**
-1. Explain routine cleaning based on approved manual/workflow.
-2. Mask cushion should be cleaned regularly because oil and dirt can cause leak.
-3. Tubing and humidifier chamber should be cleaned/dried according to manual instructions.
-4. Check replacement schedule for mask cushion, filter, tubing, and chamber.
-5. Do not use harsh chemicals unless explicitly approved by the manual/workflow.
-[note]Follow the exact Philips-approved cleaning frequency and replacement intervals from the product manuals.[/note]`,
-  escalate:false
+ cleaning:{
+  title:'Cleaning & maintenance',
+  answer:`**Service answer — cleaning & maintenance**
+Daily: empty and rinse the water chamber; air-dry.
+Weekly: hand-wash the mask cushion, headgear, and tubing in warm soapy water; rinse well; air-dry out of direct sunlight.
+Regularly: check and clean/replace the air filter; inspect the cushion for wear.
+
+Replacement (follow approved intervals): cushion, headgear, tubing, chamber, and filters per the manual schedule.
+[note]Use only mild soap and water unless the manual approves another agent. Do not put parts in a dishwasher/dryer unless explicitly approved. Ozone/UV cleaners are not recommended unless the approved workflow allows it.[/note]`,
+  escalate:false,
+  deltas:{
+   'dreamstation-1':'DreamStation 1 uses a reusable blue filter (rinse) plus an optional disposable white ultra-fine filter (replace, do not wash).',
+   'dreamstation-2':'DreamStation 2 uses a single disposable ultra-fine filter — replace on schedule, do not wash.'
+  },
+  related:['mask','humidifier']
  },
- data: {
-  title:'DreamMapper / data / usage issue',
-  answer:`**Service answer — app/data issue**
-1. Confirm whether the issue is app login, Bluetooth pairing, missing usage data, or provider data review.
-2. Confirm device is powered and therapy session has ended before expecting data sync.
-3. Check phone Bluetooth/internet if app sync is involved.
-4. Ask whether the device screen shows any error or connectivity alert.
-5. If data is needed for clinical decision-making, escalate to provider support.
-[danger]Escalate if compliance report is required urgently, data remains missing, pairing repeatedly fails, or the patient/provider needs therapy interpretation.[/danger]`,
-  escalate:true
+ data:{
+  title:'App, data & DreamMapper',
+  answer:`**Service answer — app / data / connectivity**
+1. Identify the exact issue: app login, Bluetooth pairing, missing usage data, or provider review.
+2. Confirm the device is powered and the therapy session has ended — data syncs after a session.
+3. Check the phone's Bluetooth and internet connection.
+4. Re-pair the device in the app if needed; keep the phone close during pairing.
+5. Look for any connectivity alert on the device screen.
+[danger]Escalate if a compliance report is urgently needed, data stays missing, pairing keeps failing, or the patient/provider needs therapy interpretation.[/danger]`,
+  escalate:false,
+  deltas:{
+   'dreamstation-1':'DreamStation 1 may need an attached modem/Bluetooth accessory for remote data — confirm the accessory is fitted.',
+   'dreamstation-2':'DreamStation 2 has Bluetooth (and on cellular models, built-in connectivity) — no external modem needed.'
+  },
+  related:['comfort','power']
+ },
+ alerts:{
+  title:'Alerts & error messages',
+  answer:`**Service answer — alerts & error messages**
+1. Read the exact alert text/code from the screen and note it.
+2. Acknowledge the alert per the on-screen prompt and see if it clears.
+3. Common, low-risk prompts include filter-replacement reminders and chamber-empty notices — action and clear them.
+4. Power-cycle once if the alert is generic and the device otherwise looks fine.
+[danger]Escalate any recurring error, a device-fault/service code, an alert with a burning smell or overheating, or any alert you cannot identify in the approved workflow. Do not guess a code's meaning.[/danger]`,
+  escalate:true,
+  related:['power','noise','data']
  }
 };
 
+/* ============================================================
+   CONVERSATION ENGINE
+   ============================================================ */
+const state = {
+ device:null,
+ lastIssue:null,
+ awaitingSub:null,        // issue id whose sub-options we're expecting
+ awaitingHelpful:null,    // issue id we just answered, expecting yes/no
+ greeted:false
+};
+
 const has = (t,...words)=>words.some(w=>t.includes(w));
+
+/* lightweight typo tolerance for a few common ones */
+function normalize(t){
+ return t
+  .replace(/humidi\w*/g,'humidifier')
+  .replace(/maek|msak/g,'mask')
+  .replace(/presure|pressur\b/g,'pressure')
+  .replace(/clenaing|cleanin\b/g,'cleaning');
+}
 
 function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function format(s){
@@ -376,6 +469,16 @@ function setChips(list){
   chipsEl.appendChild(c);
  });
 }
+function deviceName(id){return (devices.find(d=>d.id===id)||{}).name || 'the selected device';}
+function renderContext(){
+ const bits=[];
+ if(state.device) bits.push(`<span class="ctx-pill"><span>Device:</span> ${deviceName(state.device)}</span>`);
+ if(state.lastIssue && kb[state.lastIssue]) bits.push(`<span class="ctx-pill"><span>Topic:</span> ${kb[state.lastIssue].title}</span>`);
+ ctxEl.innerHTML = bits.join('');
+ devicesEl.querySelectorAll('.device').forEach(c=>{
+  c.classList.toggle('active', c.dataset.id===state.device);
+ });
+}
 function renderDevices(){
  devicesEl.innerHTML = devices.map(d=>`
   <article class="device" data-id="${d.id}">
@@ -388,149 +491,250 @@ function renderDevices(){
   </article>
  `).join('');
  devicesEl.querySelectorAll('.device').forEach(card=>{
-  card.onclick = () => {
-   const d = devices.find(x=>x.id === card.dataset.id);
-   handleUser('Use ' + d.name);
-  };
+  card.onclick = () => handleUser('Use ' + devices.find(x=>x.id===card.dataset.id).name);
  });
 }
+
 function detectDevice(t){
- if(has(t,'dreamstation 1','dreamstation one','ds1','station 1')) return 'dreamstation-1';
- if(has(t,'dreamstation 2','dreamstation two','ds2','station 2')) return 'dreamstation-2';
- return state.device;
-}
-function detectIssue(t){
- if(has(t,'setup','set up','install','deployment','deploy','start using','how to use')) return 'setup';
- if(has(t,'mask','leak','fit','fitting','nasal','pillow','full face','which mask')) return 'mask';
- if(has(t,'sound','noise','noisy','loud','gurgle','whistle','vibration','making sound')) return 'noise';
- if(has(t,'humidifier','water','dry mouth','dry nose','condensation','rainout','rain out','chamber')) return 'humidifier';
- if(has(t,'pressure','too strong','too high','too low','air hunger','comfort','ramp','bloated','bloating')) return 'comfort';
- if(has(t,'power','not turning on','cannot turn on','startup','start up','plug','adapter','cable')) return 'power';
- if(has(t,'clean','cleaning','maintenance','filter','replace','replacement','wash')) return 'cleaning';
- if(has(t,'dreammapper','app','bluetooth','data','sync','report','compliance')) return 'data';
- if(has(t,'escalate','urgent','danger','broken','damaged','burning','smell','smoke','water entered','electrical')) return 'escalation';
+ if(has(t,'dreamstation 1','dreamstation one','ds1','station 1','ds 1')) return 'dreamstation-1';
+ if(has(t,'dreamstation 2','dreamstation two','ds2','station 2','ds 2')) return 'dreamstation-2';
  return null;
 }
-function deviceName(id){return (devices.find(d=>d.id===id)||{}).name || 'selected Philips device';}
-function startResponse(){
+function detectIssue(t){
+ if(has(t,'overview','about the device','parts','what is','tell me about')) return 'overview';
+ if(has(t,'setup','set up','install','deployment','deploy','start using','how to use','assemble')) return 'setup';
+ if(has(t,'mask','leak','fit','fitting','nasal','pillow','full face','cushion','headgear','which mask')) return 'mask';
+ if(has(t,'sound','noise','noisy','loud','gurgle','whistle','hiss','vibration','rattle','making sound')) return 'noise';
+ if(has(t,'humidifier','water','dry mouth','dry nose','dryness','condensation','rainout','rain out','chamber')) return 'humidifier';
+ if(has(t,'pressure','too strong','too high','too low','air hunger','comfort','ramp','bloated','bloating','aerophagia')) return 'comfort';
+ if(has(t,'power','not turning on','cannot turn on','won\'t turn on','wont turn on','startup','start up','plug','adapter','cable','cord')) return 'power';
+ if(has(t,'clean','cleaning','maintenance','filter','replace','replacement','wash','hygiene')) return 'cleaning';
+ if(has(t,'dreammapper','app','bluetooth','data','sync','report','compliance','pairing','connect')) return 'data';
+ if(has(t,'alert','error','warning','code','message','exclamation','fault')) return 'alerts';
+ return null;
+}
+const AFFIRM=['yes','yep','yeah','yup','it helped','that helped','helped','solved','fixed','working now','good','great','thanks','thank you','thx','all good','perfect'];
+const NEGATE=['no','nope','still','not working','didn\'t work','did not work','doesnt work','doesn\'t work','same','still happening','still bad','no luck','not fixed'];
+const THANKS=['thank','thanks','thx','appreciate','cheers'];
+
+/* Build the contextual answer for a KB topic, weaving in device-specific delta. */
+function topicAnswer(issue){
+ const item=kb[issue];
+ if(item.sub){
+  state.awaitingSub=issue;
+  state.lastIssue=issue;
+  return {
+   text:`${item.answer}`,
+   chips:Object.keys(item.sub.options).map(o=>o).concat([{label:'Not sure',className:'secondary'}])
+  };
+ }
+ let body=item.answer;
+ if(item.deltas && state.device && item.deltas[state.device]){
+  body += `\n\n[note]${deviceName(state.device)}: ${item.deltas[state.device]}[/note]`;
+ }
+ state.lastIssue=issue;
+ state.awaitingHelpful=item.escalate?null:issue;
+ const head = state.device
+  ? `For your **${deviceName(state.device)}** — ${item.title.toLowerCase()}:\n\n`
+  : '';
+ const tail = item.escalate
+  ? ''
+  : `\n\nDid this resolve it?`;
+ const chips = item.escalate
+  ? ['Escalation criteria','Try another topic']
+  : [{label:'Yes, resolved',className:'good-chip'},{label:'No, still an issue',className:'danger-chip'}]
+     .concat((item.related||[]).slice(0,2).map(r=>kb[r]?kb[r].title:r));
+ return { text: head+body+tail, chips };
+}
+
+function subAnswer(issue, choice){
+ const item=kb[issue];
+ const keys=Object.keys(item.sub.options);
+ const match=keys.find(k=>k.toLowerCase()===choice.toLowerCase())
+   || keys.find(k=>choice.toLowerCase().includes(k.split(' ')[0].toLowerCase()));
+ state.awaitingSub=null;
+ if(!match){
+  return {
+   text:`No problem — pick the closest description and I'll guide you.`,
+   chips:keys.concat([{label:'Escalate instead',className:'danger-chip'}])
+  };
+ }
+ state.awaitingHelpful=issue;
+ let body=item.sub.options[match];
+ if(item.deltas && state.device && item.deltas[state.device]){
+  body += `\n\n[note]${deviceName(state.device)}: ${item.deltas[state.device]}[/note]`;
+ }
  return {
-  text:`Hi, I am **Philips Service Navigator**.
-
-I am a service support assistant for:
-• **DreamStation 1 Auto CPAP**
-• **DreamStation 2 Auto CPAP**
-
-I can help with setup guidance, which mask to use, device making sound, humidifier/water issues, basic troubleshooting, and when to escalate.
-
-[note]I answer only from the approved Philips product/service knowledge base. If a safe answer is not available, I escalate instead of guessing.[/note]`,
-  chips:['DreamStation 1 Auto CPAP','DreamStation 2 Auto CPAP','Device making sound','How to set up device','Which mask should be used?']
+  text: body + `\n\nDid this resolve it?`,
+  chips:[{label:'Yes, resolved',className:'good-chip'},{label:'No, still an issue',className:'danger-chip'},'Try another topic']
  };
 }
-function answerFromKb(issue, device){
- const item = kb[issue];
- if(!item){
-  state.escalated = true;
-  state.answered = true;
-  return {
-   text:`I do not have a safe answer in the current Philips knowledge base.
 
-[danger]Escalate to Philips/service provider support. Do not guess, change device settings, or provide clinical advice outside the approved workflow.[/danger]
+function startResponse(){
+ state.greeted=true;
+ const dev = state.device ? `\n\nWorking on your **${deviceName(state.device)}** — ` : '\n\n';
+ return {
+  text:`Hi, I'm the **Philips Service Navigator** 👋
+I support setup and troubleshooting for the **DreamStation 1** and **DreamStation 2** Auto CPAP.${dev}what can I help with today?
+
+[note]I answer only from the approved Philips knowledge base. If a safe answer isn't available, I escalate rather than guess.[/note]`,
+  chips:state.device
+   ? ['Device making sound','How to set up device','Which mask should be used?','Humidifier issue','Cleaning & maintenance']
+   : ['DreamStation 1 Auto CPAP','DreamStation 2 Auto CPAP','Device making sound','How to set up device']
+ };
+}
+
+function needDeviceNudge(issue){
+ return {
+  text:`I can help with **${kb[issue].title.toLowerCase()}**. Which device is this for? It lets me give the exact, model-specific steps.`,
+  chips:['DreamStation 1 Auto CPAP','DreamStation 2 Auto CPAP',{label:'Skip — general steps',className:'secondary'}]
+ };
+}
+
+function escalationCriteria(){
+ state.lastIssue='alerts';
+ return {
+  text:`**When to escalate** (stop chatbot troubleshooting and route to Philips/provider support):
+• Physical damage, cracked casing, damaged cord, burning smell, overheating, smoke, or liquid exposure
+• Water has entered the device
+• Error/fault codes that persist after basic checks
+• Device won't power on after socket/cord checks
+• Sudden, loud, grinding, or persistent abnormal noise
+• Chest discomfort, severe breathlessness, dizziness, or inability to tolerate therapy
+• Any request to change pressure or prescription
+• Mask causing skin breakdown, pressure sore, or repeated high leak
+• Urgent compliance/data needs or clinical interpretation
+• Anything not covered by the approved KB
 
 Suggested escalation note:
-• Device: ${device ? deviceName(device) : 'Not specified'}
-• User question: unclear / not covered in current KB
-• Action requested: confirm correct Philips workflow and service resolution`,
-   chips:['Start service support','Device making sound','How to set up device']
-  };
- }
- state.issueType = issue;
- state.confidence = 1;
- state.answered = true;
- state.escalated = !!item.escalate;
- return {
-  text:`Device: **${device ? deviceName(device) : 'Not specified yet'}**
-Issue matched: **${item.title}**
+• Device: ${state.device?deviceName(state.device):'Not specified'}
+• Topic: ${state.lastIssue&&kb[state.lastIssue]?kb[state.lastIssue].title:'—'}
+• Reason: safe answer not available / criteria above met
 
-${item.answer}`,
-  chips:[
-   'Device making sound',
-   'How to set up device',
-   'Which mask should be used?',
-   {label:'Escalation criteria', className:'danger-chip'}
-  ]
+[danger]Rule: if no safe answer exists in the KB, escalate. Never invent service steps or clinical advice.[/danger]`,
+  chips:['Start over','Device making sound','How to set up device']
  };
 }
-function escalationCriteria(){
- state.issueType = 'escalation';
- state.answered = true;
- state.escalated = true;
+
+function topicMenu(extra){
  return {
-  text:`**Escalation criteria**
-
-Escalate instead of continuing chatbot troubleshooting when:
-• Device has physical damage, cracked casing, damaged cable, burning smell, overheating, smoke, or liquid exposure
-• Water entered the CPAP device
-• Error messages persist after basic workflow checks
-• Machine will not power on after socket/cable checks
-• Noise is sudden, loud, abnormal, or continues after leak/tube/chamber checks
-• Patient has chest discomfort, severe breathlessness, dizziness, or cannot tolerate therapy
-• Pressure settings or prescription changes are requested
-• Mask causes skin breakdown, pressure sore, or repeated high leak
-• App/data issue affects urgent compliance or clinical review
-• Question is not covered by the approved Philips KB
-
-[danger]Rule: if no safe answer exists in the KB, answer with escalation. Do not hallucinate service steps.[/danger]`,
-  chips:['Start service support','Device making sound','How to set up device']
+  text: (extra?extra+'\n\n':'') + `What would you like to look at?`,
+  chips:['How to set up device','Device making sound','Which mask should be used?','Humidifier issue','Pressure & comfort','Cleaning & maintenance','App / data issue',{label:'Escalation criteria',className:'danger-chip'}]
  };
 }
+
 function respond(raw){
- const t = raw.toLowerCase().trim();
- if(/^(hi|hey|hello|yo|start|restart|start service support)\b/.test(t)){
-  Object.assign(state,{device:null,issueType:null,confidence:0,answered:false,escalated:false});
+ const tRaw = raw.toLowerCase().trim();
+ const t = normalize(tRaw);
+
+ // global resets / greetings
+ if(/^(hi|hey|hello|yo|start|restart|start over|menu)\b/.test(t) || t==='start service support'){
+  if(/start over|restart/.test(t)){ Object.assign(state,{lastIssue:null,awaitingSub:null,awaitingHelpful:null}); }
   return startResponse();
  }
- const detectedDevice = detectDevice(t);
- if(detectedDevice){state.device = detectedDevice;}
 
- if(has(t,'escalation criteria','when to escalate','escalate issue','escalate')) return escalationCriteria();
-
- const issue = detectIssue(t);
- if(issue === 'escalation') return escalationCriteria();
- if(issue) return answerFromKb(issue, state.device);
-
- if(detectedDevice){
+ // capture device mention anywhere
+ const dev=detectDevice(t);
+ if(dev){
+  const switched = state.device && state.device!==dev;
+  state.device=dev;
+  renderContext();
+  if(state.lastIssue && !state.awaitingSub){
+   // re-answer last topic for the new device
+   const r=topicAnswer(state.lastIssue);
+   r.text=`Got it — switching to **${deviceName(dev)}**.\n\n`+r.text;
+   return r;
+  }
   return {
-   text:`Selected device: **${deviceName(detectedDevice)}**
-
-What service issue do you want to check?`,
-   chips:['Device making sound','How to set up device','Which mask should be used?','Humidifier issue','Pressure feels too strong']
+   text:`${switched?'Switched to':'Great, using'} **${deviceName(dev)}**. ${devices.find(d=>d.id===dev).notes}\n\nWhat do you need help with?`,
+   chips:['How to set up device','Device making sound','Which mask should be used?','Humidifier issue','Cleaning & maintenance']
   };
  }
 
- return {
-  text:`I understood the question, but I cannot safely match it to an approved Philips service workflow yet.
+ // "skip / general steps"
+ if(has(t,'skip','general steps','general','any device') && state.lastIssue && state.awaitingHelpful!==state.lastIssue){
+  return topicAnswer(state.lastIssue);
+ }
 
-Please choose the closest issue type, or I will escalate if it is not covered.
+ // escalation intents
+ if(has(t,'escalation criteria','when to escalate','escalate','urgent','danger','broken','damaged','burning','smell','smoke','water entered','electrical')){
+  return escalationCriteria();
+ }
 
-[note]I first refine the question, then search the Philips KB, then answer only from approved content.[/note]`,
-  chips:['DreamStation 1 Auto CPAP','DreamStation 2 Auto CPAP','Device making sound','How to set up device','Escalation criteria']
- };
+ // awaiting a sub-option choice (e.g. type of noise)
+ if(state.awaitingSub){
+  const issue=state.awaitingSub;
+  if(has(t,'not sure','dont know','don\'t know','unsure')){
+   state.awaitingSub=null;
+   return { text:`That's fine. Let's run the general checks for ${kb[issue].title.toLowerCase()} and escalate if it persists.`, chips:Object.keys(kb[issue].sub.options) };
+  }
+  return subAnswer(issue,raw.trim());
+ }
+
+ // awaiting helpful yes/no after an answer
+ if(state.awaitingHelpful){
+  const issue=state.awaitingHelpful;
+  if(AFFIRM.some(w=>t.includes(w))){
+   state.awaitingHelpful=null;
+   const rel=(kb[issue].related||[]).slice(0,3).map(r=>kb[r]?kb[r].title:r);
+   return { text:`Glad that sorted it. 🙌 Anything else I can help with?`, chips:rel.concat([{label:'No, all done',className:'secondary'}]) };
+  }
+  if(NEGATE.some(w=>t.includes(w))){
+   state.awaitingHelpful=null;
+   return {
+    text:`Thanks for letting me know. Since the standard steps didn't resolve it, the safe path is to escalate rather than keep guessing.`,
+    chips:[{label:'Show escalation criteria',className:'danger-chip'},'Try a different topic']
+   };
+  }
+  // not a yes/no — fall through and treat as new request, clearing the wait
+  state.awaitingHelpful=null;
+ }
+
+ // "all done / no" closing
+ if(has(t,'all done','no all done','that\'s all','thats all','nothing else','no thanks','no thank you')){
+  return { text:`Perfect — take care. Reopen me any time you need setup or troubleshooting help. 👋`, chips:['Start over'] };
+ }
+ if(THANKS.some(w=>t.includes(w)) && t.length<25){
+  return { text:`You're welcome! Anything else I can help with?`, chips:['Device making sound','How to set up device','Which mask should be used?',{label:'No, all done',className:'secondary'}] };
+ }
+
+ if(has(t,'another topic','different topic','try another','something else','menu','topics')){
+  return topicMenu('Sure.');
+ }
+
+ // main intent match
+ const issue=detectIssue(t);
+ if(issue==='alerts') return topicAnswer('alerts');
+ if(issue){
+  // device-specific topics benefit from knowing the model first
+  const wantsDevice=['setup','noise','humidifier','comfort','cleaning','data'].includes(issue);
+  if(wantsDevice && !state.device){
+   state.lastIssue=issue;
+   return needDeviceNudge(issue);
+  }
+  return topicAnswer(issue);
+ }
+
+ // fallback
+ return topicMenu(`I want to make sure I give you a safe, approved answer, and I couldn't confidently match that to a workflow.`);
 }
+
 function handleUser(text){
- text = (text||'').trim();
+ text=(text||'').trim();
  if(!text) return;
  addMsg(text,'user');
  input.value='';
  input.style.height='auto';
  setChips([]);
  showTyping();
- const r = respond(text);
- const delay = Math.min(900, 250 + r.text.length*2);
+ const r=respond(text);
+ const delay=Math.min(850,260+r.text.length*1.6);
  setTimeout(()=>{
   hideTyping();
   addMsg(r.text,'bot');
   setChips(r.chips);
- }, delay);
+  renderContext();
+ },delay);
 }
 sendBtn.onclick=()=>handleUser(input.value);
 input.addEventListener('keydown',e=>{
@@ -542,13 +746,14 @@ input.addEventListener('input',()=>{
 });
 window.addEventListener('load',()=>{
  renderDevices();
+ renderContext();
  setTimeout(()=>{
-  addMsg(`Hi — I am **Philips Service Navigator**.
+  state.greeted=true;
+  addMsg(`Hi — I'm the **Philips Service Navigator** 👋
+I help field agents, sleep consultants, and users with setup and troubleshooting for the **DreamStation 1** and **DreamStation 2** Auto CPAP.
 
-I help field agents, sleep consultants, and users with practical service questions for DreamStation 1 Auto CPAP and DreamStation 2 Auto CPAP.
-
-Try asking: **device making sound**, **how to set up device**, or **which mask should be used?**`,'bot');
-  setChips(['Start service support','Device making sound','How to set up device','Which mask should be used?','Escalation criteria']);
+Pick a device above for model-specific steps, or just tell me what's happening — for example **"device making a hissing sound"**, **"how do I set it up"**, or **"which mask should I use?"**`,'bot');
+  setChips(['DreamStation 1 Auto CPAP','DreamStation 2 Auto CPAP','Device making sound','How to set up device','Which mask should be used?']);
  },300);
 });
 </script>
